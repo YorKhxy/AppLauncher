@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "apps": [
+    {
+      "id": "06ccc8ff-777c-4eb2-a12c-787e50735cfc",
+      "name": "中控",
+      "path": "G:/gamestart-v1.34/gamestart/启动.bat",
+      "working_dir": "",
+      "icon": "",
+      "description": ""
+    },
+    {
+      "id": "3ad8f881-a1cb-4080-9f42-5331044fff1f",
+      "name": "绝境突围",
+      "path": "G:/gamestart-v1.34/gamestart/CS_Server/绝境突围.bat",
+      "working_dir": "",
+      "icon": "",
+      "description": ""
+    }
+  ]
+}

@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="skin-neon">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VrLauncher</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --void: #030712;
+      --surface: #0b1224;
+      --elev: #111c33;
+      --cyan: #22d3ee;
+      --cyan-dim: #0891b2;
+      --magenta: #e879f9;
+      --violet: #a78bfa;
+      --rose: #fb7185;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --grid-line: rgba(34, 211, 238, 0.07);
+      --chrome-border: rgba(34, 211, 238, 0.35);
+      --chrome-glow-outer: rgba(34, 211, 238, 0.06);
+      --search-border: rgba(34, 211, 238, 0.55);
+      --card-primary-border: rgba(34, 211, 238, 0.55);
+      --dock-accent-border: rgba(34, 211, 238, 0.65);
+      --modal-shell-border: rgba(34, 211, 238, 0.45);
+      --modal-shell-glow: rgba(34, 211, 238, 0.08);
+      --modal-cap-line: rgba(34, 211, 238, 0.25);
+      --input-focus-border: rgba(34, 211, 238, 0.65);
+      --input-focus-glow: rgba(34, 211, 238, 0.2);
+      --browse-hover-bg: rgba(34, 211, 238, 0.12);
+      --form-primary-border: rgba(34, 211, 238, 0.65);
+      --atm-blob-mid: rgba(34, 211, 238, 0.12);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: "Exo 2", system-ui, sans-serif;
+      background: var(--void);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+    .atmosphere {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 120% 80% at 10% -10%, rgba(167, 139, 250, 0.18), transparent 50%),
+        radial-gradient(ellipse 90% 60% at 95% 100%, var(--atm-blob-mid), transparent 45%),
+        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(232, 121, 249, 0.06), transparent 70%);
+    }
+    .grid-floor {
+      position: fixed;
+      left: -20%;
+      right: -20%;
+      bottom: -15%;
+      height: 55vh;
+      transform-origin: 50% 100%;
+      transform: perspective(420px) rotateX(58deg) scale(1.15);
+      z-index: 0;
+      background:
+        linear-gradient(to top, var(--void) 0%, transparent 38%),
+        repeating-linear-gradient(90deg, var(--grid-line) 0 1px, transparent 1px 48px),
+        repeating-linear-gradient(0deg, var(--grid-line) 0 1px, transparent 1px 48px);
+      mask-image: linear-gradient(to top, black 0%, transparent 92%);
+      -webkit-mask-image: linear-gradient(to top, black 0%, transparent 92%);
+    }
+    .shell {
+      position: relative;
+      z-index: 1;
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 2.25rem 1.75rem 6rem;
+      min-height: 100%;
+    }
+    .chrome {
+      border: 1px solid var(--chrome-border);
+      border-radius: 22px;
+      background: linear-gradient(165deg, rgba(17, 28, 51, 0.92) 0%, rgba(11, 18, 36, 0.96) 100%);
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        0 24px 80px rgba(0, 0, 0, 0.55),
+        0 0 120px var(--chrome-glow-outer);
+      padding: 1.5rem 1.75rem 1.25rem;
+    }
+    .head-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.1rem;
+    }
+    .head-row h1 {
+      margin: 0;
+      font-family: Orbitron, sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.35rem, 3.5vw, 1.85rem);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: linear-gradient(105deg, var(--text) 0%, var(--cyan) 55%, var(--violet) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .head-row .status {
+      font-family: Orbitron, sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .head-row .status.status--ok { color: var(--cyan-dim); }
+    .head-row .status.status--busy { color: var(--cyan); }
+    .head-row .status.status--warn { color: #fbbf24; }
+    .head-row .status.status--err { color: var(--rose); }
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      max-width: 520px;
+      margin-left: auto;
+      margin-bottom: 1rem;
+      padding: 0.55rem 1rem;
+      border-radius: 999px;
+      background: rgba(7, 13, 26, 0.9);
+      border: 1px solid var(--search-border);
+    }
+    .search input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: "Exo 2", sans-serif;
+      font-size: 0.95rem;
+    }
+    .search input::placeholder { color: var(--muted); }
+    .section-hint {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--cyan-dim);
+      margin-bottom: 0.75rem;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem 0.65rem;
+    }
+    @media (max-width: 900px) {
+      .card-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .card {
+      position: relative;
+      border-radius: 14px;
+      padding: 0.85rem 0.75rem 0.7rem;
+      min-height: 132px;
+      background: linear-gradient(180deg, var(--elev) 0%, rgba(15, 23, 42, 0.65) 100%);
+      border: 1px solid rgba(51, 65, 85, 0.9);
+      transition: transform 0.2s ease, box-shadow 0.25s ease;
+      cursor: pointer;
+    }
+    .card:hover:not(.card--selected) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+    }
+    .card h3 {
+      margin: 0 0 0.35rem;
+      font-family: Orbitron, sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .card p { margin: 0 0 0.5rem; font-size: 0.68rem; color: var(--muted); line-height: 1.35; word-break: break-all; }
+    .card .meta { font-size: 0.62rem; color: var(--cyan-dim); margin-bottom: 0.45rem; }
+    .card .actions { display: flex; gap: 0.4rem; }
+    .card button {
+      flex: 1;
+      font-family: "Exo 2", sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.35rem 0.25rem;
+      border-radius: 8px;
+      border: 1px solid rgba(71, 85, 105, 0.8);
+      background: rgba(15, 23, 42, 0.85);
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .card button.primary { border-color: var(--card-primary-border); color: var(--cyan); }
+    .card button.danger { border-color: rgba(251, 113, 133, 0.45); color: var(--rose); }
+    .card button:disabled { opacity: 0.45; cursor: default; }
+    .card--empty h3 { color: var(--muted); }
+    .card--empty p { font-style: italic; opacity: 0.85; }
+    .card .badge-pending { display: none; }
+    .card--selected .badge-pending { display: block; }
+    .card--selected {
+      border-color: transparent;
+      isolation: isolate;
+    }
+    .card--selected::before {
+      content: "";
+      position: absolute;
+      inset: -3px;
+      border-radius: 16px;
+      padding: 2px;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: border-neon 2.6s ease-in-out infinite;
+      z-index: -1;
+      transition: background 0.55s ease, filter 0.45s ease;
+    }
+    .card--selected::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: 18px;
+      z-index: -2;
+      animation: pulse-halo 1.8s ease-in-out infinite;
+      transition: box-shadow 0.55s ease;
+    }
+    .card--selected[data-rainbow="0"]::before { background: conic-gradient(from 0deg, #7f1d1d, #dc2626, #f87171, #fb923c, #dc2626, #7f1d1d); }
+    .card--selected[data-rainbow="0"]::after { box-shadow: 0 0 22px rgba(220, 38, 38, 0.55), 0 0 52px rgba(251, 146, 60, 0.28); }
+    .card--selected[data-rainbow="1"]::before { background: conic-gradient(from 0deg, #9a3412, #ea580c, #fb923c, #fbbf24, #ea580c, #9a3412); }
+    .card--selected[data-rainbow="1"]::after { box-shadow: 0 0 22px rgba(234, 88, 12, 0.5), 0 0 50px rgba(251, 191, 36, 0.25); }
+    .card--selected[data-rainbow="2"]::before { background: conic-gradient(from 0deg, #a16207, #ca8a04, #facc15, #fde047, #eab308, #a16207); }
+    .card--selected[data-rainbow="2"]::after { box-shadow: 0 0 22px rgba(234, 179, 8, 0.5), 0 0 48px rgba(253, 224, 71, 0.28); }
+    .card--selected[data-rainbow="3"]::before { background: conic-gradient(from 0deg, #14532d, #16a34a, #4ade80, #86efac, #22c55e, #14532d); }
+    .card--selected[data-rainbow="3"]::after { box-shadow: 0 0 22px rgba(34, 197, 94, 0.45), 0 0 48px rgba(134, 239, 172, 0.22); }
+    .card--selected[data-rainbow="4"]::before { background: conic-gradient(from 0deg, #134e4a, #0d9488, #2dd4bf, #5eead4, #14b8a6, #134e4a); }
+    .card--selected[data-rainbow="4"]::after { box-shadow: 0 0 22px rgba(20, 184, 166, 0.5), 0 0 50px rgba(45, 212, 191, 0.25); }
+    .card--selected[data-rainbow="5"]::before { background: conic-gradient(from 0deg, #1e3a8a, #2563eb, #60a5fa, #93c5fd, #3b82f6, #1e3a8a); }
+    .card--selected[data-rainbow="5"]::after { box-shadow: 0 0 22px rgba(37, 99, 235, 0.5), 0 0 52px rgba(147, 197, 253, 0.22); }
+    .card--selected[data-rainbow="6"]::before { background: conic-gradient(from 0deg, #312e81, #4f46e5, #818cf8, #a5b4fc, #6366f1, #312e81); }
+    .card--selected[data-rainbow="6"]::after { box-shadow: 0 0 22px rgba(79, 70, 229, 0.48), 0 0 50px rgba(165, 180, 252, 0.22); }
+    .card--selected[data-rainbow="7"]::before { background: conic-gradient(from 0deg, #581c87, #a855f7, #d946ef, #e879f9, #9333ea, #581c87); }
+    .card--selected[data-rainbow="7"]::after { box-shadow: 0 0 22px rgba(168, 85, 247, 0.48), 0 0 52px rgba(232, 121, 249, 0.25); }
+    @keyframes border-neon {
+      0%, 100% { filter: saturate(1) brightness(1); opacity: 0.92; }
+      50% { filter: saturate(1.18) brightness(1.06); opacity: 1; }
+    }
+    @keyframes pulse-halo {
+      0%, 100% { opacity: 0.45; }
+      50% { opacity: 0.95; }
+    }
+    .badge-pending {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      font-family: Orbitron, sans-serif;
+      font-size: 0.48rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      padding: 0.2rem 0.3rem;
+      border-radius: 4px;
+      color: var(--magenta);
+      background: rgba(24, 11, 40, 0.92);
+      border: 1px dashed rgba(232, 121, 249, 0.65);
+      animation: badge-blink 2s ease-in-out infinite;
+    }
+    @keyframes badge-blink {
+      0%, 100% { opacity: 0.65; }
+      50% { opacity: 1; }
+    }
+    .dock {
+      position: fixed;
+      left: 50%;
+      bottom: 1.25rem;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 16px;
+      background: rgba(7, 9, 20, 0.92);
+      border: 1px solid rgba(167, 139, 250, 0.45);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+    }
+    .dock button {
+      font-family: "Exo 2", sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.45rem 0.75rem;
+      border-radius: 10px;
+      border: 1px solid rgba(71, 85, 105, 0.85);
+      background: rgba(16, 27, 51, 0.95);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .dock button.accent { border-color: var(--dock-accent-border); color: var(--cyan); }
+    .dock .sep {
+      font-family: Orbitron, sans-serif;
+      font-size: 0.58rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      margin: 0 0.15rem;
+    }
+    .no-bridge {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      background: rgba(127, 29, 29, 0.35);
+      border: 1px solid rgba(251, 113, 133, 0.5);
+      color: #fecaca;
+      font-size: 0.85rem;
+    }
+
+    /* —— 添加 / 编辑应用（Web 内嵌）—— */
+    .form-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      padding: 1.25rem;
+      overflow-y: auto;
+    }
+    .form-modal[hidden] {
+      display: none !important;
+    }
+    .form-modal__backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.72);
+      backdrop-filter: blur(6px);
+    }
+    .form-modal__panel {
+      position: relative;
+      z-index: 1;
+      width: min(440px, 100%);
+      margin: 6vh auto 2rem;
+      max-height: min(90vh, 640px);
+      overflow: auto;
+      border-radius: 18px;
+      border: 1px solid var(--modal-shell-border);
+      background: linear-gradient(165deg, rgba(17, 28, 51, 0.98) 0%, rgba(7, 9, 20, 0.99) 100%);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.65), 0 0 60px var(--modal-shell-glow);
+      padding: 0;
+    }
+    .form-modal__cap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid var(--modal-cap-line);
+      background: rgba(11, 18, 36, 0.95);
+    }
+    .form-modal__cap h2 {
+      margin: 0;
+      font-family: Orbitron, sans-serif;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .form-modal__cap button {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0.2rem 0.45rem;
+      border-radius: 6px;
+    }
+    .form-modal__cap button:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .form-modal__body {
+      padding: 1.1rem 1.15rem 1.25rem;
+    }
+    .form-modal__body > p.sub {
+      margin: 0 0 1rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .form-field {
+      margin-bottom: 0.95rem;
+    }
+    .form-field label {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+    .form-field input,
+    .form-field textarea {
+      width: 100%;
+      padding: 0.5rem 0.65rem;
+      border-radius: 10px;
+      border: 1px solid rgba(51, 65, 85, 0.95);
+      background: rgba(7, 13, 26, 0.95);
+      color: var(--text);
+      font-family: "Exo 2", sans-serif;
+      font-size: 0.88rem;
+      outline: none;
+    }
+    .form-field input:focus,
+    .form-field textarea:focus {
+      border-color: var(--input-focus-border);
+      box-shadow: 0 0 0 1px var(--input-focus-glow);
+    }
+    .form-field textarea {
+      min-height: 4rem;
+      resize: vertical;
+    }
+    .path-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: stretch;
+    }
+    .path-row input {
+      flex: 1;
+      min-width: 0;
+    }
+    .path-row button {
+      flex-shrink: 0;
+      padding: 0 0.85rem;
+      border-radius: 10px;
+      border: 1px solid var(--card-primary-border);
+      background: rgba(17, 28, 51, 0.95);
+      color: var(--cyan);
+      font-family: Orbitron, sans-serif;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+    }
+    .path-row button:hover {
+      background: var(--browse-hover-bg);
+    }
+    .form-modal__foot {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid rgba(51, 65, 85, 0.5);
+    }
+    .form-modal__foot button {
+      padding: 0.45rem 1rem;
+      border-radius: 10px;
+      font-family: "Exo 2", sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid rgba(71, 85, 105, 0.85);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+    }
+    .form-modal__foot button.primary {
+      border-color: var(--form-primary-border);
+      background: var(--cyan);
+      color: var(--void);
+    }
+    .form-modal__foot button.primary:hover {
+      filter: brightness(1.05);
+    }
+
+    html.skin-ember {
+      --void: #14090d;
+      --surface: #1f0f16;
+      --elev: #2a1520;
+      --cyan: #fb7185;
+      --cyan-dim: #f43f5e;
+      --magenta: #fda4af;
+      --violet: #fb923c;
+      --rose: #fecdd3;
+      --text: #fff1f2;
+      --muted: #9f8890;
+      --grid-line: rgba(251, 113, 133, 0.09);
+      --chrome-border: rgba(251, 113, 133, 0.42);
+      --chrome-glow-outer: rgba(251, 113, 133, 0.07);
+      --search-border: rgba(251, 113, 133, 0.58);
+      --card-primary-border: rgba(251, 113, 133, 0.55);
+      --dock-accent-border: rgba(251, 180, 180, 0.7);
+      --modal-shell-border: rgba(251, 113, 133, 0.48);
+      --modal-shell-glow: rgba(251, 113, 133, 0.1);
+      --modal-cap-line: rgba(251, 113, 133, 0.28);
+      --input-focus-border: rgba(253, 164, 175, 0.75);
+      --input-focus-glow: rgba(251, 113, 133, 0.22);
+      --browse-hover-bg: rgba(251, 113, 133, 0.14);
+      --form-primary-border: rgba(254, 202, 202, 0.75);
+      --atm-blob-mid: rgba(251, 113, 133, 0.14);
+    }
+    html.skin-ember .atmosphere {
+      background:
+        radial-gradient(ellipse 120% 80% at 8% -5%, rgba(251, 146, 60, 0.22), transparent 52%),
+        radial-gradient(ellipse 90% 55% at 92% 100%, rgba(244, 63, 94, 0.16), transparent 48%),
+        radial-gradient(ellipse 50% 42% at 50% 52%, rgba(253, 186, 116, 0.07), transparent 72%);
+    }
+
+    html.skin-aurora {
+      --void: #050f0f;
+      --surface: #0a1c1a;
+      --elev: #0f2925;
+      --cyan: #5eead4;
+      --cyan-dim: #14b8a6;
+      --magenta: #6ee7b7;
+      --violet: #34d399;
+      --rose: #f9a8d4;
+      --text: #ecfdf5;
+      --muted: #86b3a9;
+      --grid-line: rgba(45, 212, 191, 0.1);
+      --chrome-border: rgba(45, 212, 191, 0.42);
+      --chrome-glow-outer: rgba(52, 211, 153, 0.08);
+      --search-border: rgba(94, 234, 212, 0.55);
+      --card-primary-border: rgba(45, 212, 191, 0.52);
+      --dock-accent-border: rgba(110, 231, 183, 0.65);
+      --modal-shell-border: rgba(45, 212, 191, 0.45);
+      --modal-shell-glow: rgba(52, 211, 153, 0.09);
+      --modal-cap-line: rgba(45, 212, 191, 0.28);
+      --input-focus-border: rgba(110, 231, 183, 0.75);
+      --input-focus-glow: rgba(45, 212, 191, 0.2);
+      --browse-hover-bg: rgba(45, 212, 191, 0.12);
+      --form-primary-border: rgba(94, 234, 212, 0.7);
+      --atm-blob-mid: rgba(52, 211, 153, 0.14);
+    }
+    html.skin-aurora .atmosphere {
+      background:
+        radial-gradient(ellipse 115% 75% at 12% -8%, rgba(52, 211, 153, 0.2), transparent 50%),
+        radial-gradient(ellipse 85% 55% at 90% 100%, rgba(45, 212, 191, 0.14), transparent 46%),
+        radial-gradient(ellipse 48% 42% at 48% 48%, rgba(167, 243, 208, 0.06), transparent 70%);
+    }
+
+    #settingsModal .form-modal__panel {
+      width: min(520px, 100%);
+    }
+    .skin-pick-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.65rem;
+      margin-bottom: 0.5rem;
+    }
+    @media (max-width: 520px) {
+      .skin-pick-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .skin-card {
+      text-align: left;
+      padding: 0.65rem 0.7rem;
+      border-radius: 12px;
+      border: 2px solid rgba(51, 65, 85, 0.85);
+      background: rgba(7, 13, 26, 0.85);
+      cursor: pointer;
+      color: var(--text);
+      font-family: "Exo 2", sans-serif;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .skin-card:hover {
+      border-color: rgba(148, 163, 184, 0.55);
+    }
+    .skin-card.is-active {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 1px var(--input-focus-glow), 0 0 20px var(--chrome-glow-outer);
+    }
+    .skin-card__sw {
+      height: 2.25rem;
+      border-radius: 8px;
+      margin-bottom: 0.4rem;
+    }
+    .skin-card__name {
+      font-family: Orbitron, sans-serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .skin-card__desc {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+      line-height: 1.3;
+    }
+    .skin-card[data-skin="neon"] .skin-card__sw {
+      background: linear-gradient(120deg, #22d3ee, #a78bfa, #e879f9);
+    }
+    .skin-card[data-skin="ember"] .skin-card__sw {
+      background: linear-gradient(120deg, #fb7185, #fb923c, #fda4af);
+    }
+    .skin-card[data-skin="aurora"] .skin-card__sw {
+      background: linear-gradient(120deg, #14b8a6, #5eead4, #6ee7b7);
+    }
+
+    .form-err {
+      margin: 0.65rem 0 0;
+      font-size: 0.78rem;
+      color: var(--rose);
+      min-height: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="atmosphere" aria-hidden="true"></div>
+  <div class="grid-floor" aria-hidden="true"></div>
+  <div class="shell">
+    <div class="chrome">
+      <div class="head-row">
+        <h1>VR Launcher</h1>
+        <span id="statusLine" class="status status--ok">状态：就绪</span>
+      </div>
+      <div class="search">
+        <span aria-hidden="true">⌕</span>
+        <input id="searchInput" type="text" placeholder="筛选应用..." autocomplete="off" />
+      </div>
+
+      <div id="cardGrid" class="card-grid"></div>
+      <div id="noBridge" class="no-bridge" hidden>
+        未检测到 pywebview API（若用浏览器直接打开本文件会出现此提示）。请从 <code>python main.py</code> 启动。
+      </div>
+    </div>
+  </div>
+  <nav class="dock" aria-label="底栏">
+    <button type="button" class="accent" data-act="add">＋ 添加应用</button>
+    <button type="button" data-act="edit">编辑</button>
+    <button type="button" data-act="del">删除</button>
+    <button type="button" data-act="refresh">刷新</button>
+    <button type="button" data-act="settings">⚙ 外观</button>
+    <span class="sep">排序</span>
+    <button type="button" data-act="up">上移</button>
+    <button type="button" data-act="down">下移</button>
+  </nav>
+
+  <div id="appFormModal" class="form-modal" hidden>
+    <div class="form-modal__backdrop" data-form-close tabindex="-1"></div>
+    <div class="form-modal__panel" role="dialog" aria-modal="true" aria-labelledby="formModalTitle">
+      <div class="form-modal__cap">
+        <h2 id="formModalTitle">添加应用</h2>
+        <button type="button" data-form-close aria-label="关闭">✕</button>
+      </div>
+      <div class="form-modal__body">
+        <p class="sub" id="formModalSub">填写名称与可执行路径；可选工作目录与备注。</p>
+        <div class="form-field">
+          <label for="fName">应用名称</label>
+          <input id="fName" type="text" autocomplete="off" placeholder="例如：中控" />
+        </div>
+        <div class="form-field">
+          <label for="fPath">应用路径</label>
+          <div class="path-row">
+            <input id="fPath" type="text" autocomplete="off" placeholder="C:\Path\app.exe" />
+            <button type="button" id="fBrowse">浏览</button>
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="fWd">工作目录（可选）</label>
+          <input id="fWd" type="text" autocomplete="off" placeholder="默认可执行文件所在目录" />
+        </div>
+        <div class="form-field">
+          <label for="fIcon">图标路径（可选）</label>
+          <input id="fIcon" type="text" autocomplete="off" placeholder="" />
+        </div>
+        <div class="form-field">
+          <label for="fDesc">备注（可选）</label>
+          <textarea id="fDesc" placeholder=""></textarea>
+        </div>
+        <p id="fError" class="form-err" aria-live="polite"></p>
+        <div class="form-modal__foot">
+          <button type="button" data-form-close>取消</button>
+          <button type="button" class="primary" id="fSave">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsModal" class="form-modal" hidden>
+    <div class="form-modal__backdrop" data-settings-close tabindex="-1"></div>
+    <div class="form-modal__panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="form-modal__cap">
+        <h2 id="settingsTitle">外观设置</h2>
+        <button type="button" data-settings-close aria-label="关闭">✕</button>
+      </div>
+      <div class="form-modal__body">
+        <p class="sub">选择界面皮肤，保存后即时生效并写入配置文件。</p>
+        <div class="skin-pick-grid" id="skinPickGrid">
+          <button type="button" class="skin-card" data-skin="neon">
+            <div class="skin-card__sw" aria-hidden="true"></div>
+            <div class="skin-card__name">霓虹</div>
+            <div class="skin-card__desc">青紫 · 默认</div>
+          </button>
+          <button type="button" class="skin-card" data-skin="ember">
+            <div class="skin-card__sw" aria-hidden="true"></div>
+            <div class="skin-card__name">余烬</div>
+            <div class="skin-card__desc">暖粉橙</div>
+          </button>
+          <button type="button" class="skin-card" data-skin="aurora">
+            <div class="skin-card__sw" aria-hidden="true"></div>
+            <div class="skin-card__name">极光</div>
+            <div class="skin-card__desc">青绿薄荷</div>
+          </button>
+        </div>
+        <p id="settingsErr" class="form-err" aria-live="polite"></p>
+        <div class="form-modal__foot">
+          <button type="button" data-settings-close>取消</button>
+          <button type="button" class="primary" id="settingsSave">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <div id="confirmModal" class="form-modal" hidden>
+    <div class="form-modal__backdrop" data-confirm-close tabindex="-1"></div>
+    <div class="form-modal__panel" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <div class="form-modal__cap">
+        <h2 id="confirmTitle">确认</h2>
+        <button type="button" data-confirm-close aria-label="关闭">✕</button>
+      </div>
+      <div class="form-modal__body">
+        <p class="sub" id="confirmMessage"></p>
+        <p id="confirmError" class="form-err" aria-live="polite"></p>
+        <div class="form-modal__foot">
+          <button type="button" data-confirm-close>取消</button>
+          <button type="button" class="primary" id="confirmOk">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="alertModal" class="form-modal" hidden>
+    <div class="form-modal__backdrop" data-alert-close tabindex="-1"></div>
+    <div class="form-modal__panel" role="dialog" aria-modal="true" aria-labelledby="alertTitle">
+      <div class="form-modal__cap">
+        <h2 id="alertTitle">提示</h2>
+        <button type="button" data-alert-close aria-label="关闭">✕</button>
+      </div>
+      <div class="form-modal__body">
+        <p class="sub" id="alertMessage"></p>
+        <p id="alertError" class="form-err" aria-live="polite"></p>
+        <div class="form-modal__foot">
+          <button type="button" class="primary" data-alert-close>确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const RAINBOW_NAMES = ["赤", "橙", "黄", "绿", "青", "蓝", "靛", "紫"];
+      const gridEl = document.getElementById("cardGrid");
+      const statusEl = document.getElementById("statusLine");
+      const searchEl = document.getElementById("searchInput");
+      const noBridgeEl = document.getElementById("noBridge");
+      const appFormModal = document.getElementById("appFormModal");
+      const confirmModal = document.getElementById("confirmModal");
+      const alertModal = document.getElementById("alertModal");
+      const formTitle = document.getElementById("formModalTitle");
+      const formSub = document.getElementById("formModalSub");
+      const fName = document.getElementById("fName");
+      const fPath = document.getElementById("fPath");
+      const fWd = document.getElementById("fWd");
+      const fIcon = document.getElementById("fIcon");
+      const fDesc = document.getElementById("fDesc");
+      const fError = document.getElementById("fError");
+      const settingsModal = document.getElementById("settingsModal");
+      const settingsErr = document.getElementById("settingsErr");
+      const skinPickGrid = document.getElementById("skinPickGrid");
+      let state = null;
+      let searchDebounce = null;
+      let started = false;
+      let formEditId = null;
+      let pendingSkin = "neon";
+
+      let _confirmResolve = null;
+
+      function showConfirm(title, message) {
+        document.getElementById("confirmTitle").textContent = title;
+        document.getElementById("confirmMessage").textContent = message;
+        document.getElementById("confirmError").textContent = "";
+        confirmModal.hidden = false;
+        updateBodyScrollLock();
+        return new Promise(function(resolve) {
+          _confirmResolve = resolve;
+        });
+      }
+
+      function resolveConfirm(result) {
+        confirmModal.hidden = true;
+        updateBodyScrollLock();
+        if (_confirmResolve) {
+          _confirmResolve(result);
+          _confirmResolve = null;
+        }
+      }
+
+      window._triggerConfirm = function(title, message) {
+        showConfirm(title, message);
+      };
+
+      window._triggerAlert = function(title, message) {
+        openAlertModal(title, message);
+      };
+
+      async function api(method) {
+        const rest = Array.prototype.slice.call(arguments, 1);
+        const bridge = window.pywebview && window.pywebview.api;
+        if (!bridge || typeof bridge[method] !== "function") return null;
+        return await bridge[method].apply(bridge, rest);
+      }
+
+      function esc(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      const VALID_SKINS = ["neon", "ember", "aurora"];
+
+      function applySkin(skin) {
+        const k = skin && VALID_SKINS.indexOf(skin) >= 0 ? skin : "neon";
+        document.documentElement.classList.remove("skin-neon", "skin-ember", "skin-aurora");
+        document.documentElement.classList.add("skin-" + k);
+      }
+
+      function updateBodyScrollLock() {
+        document.body.style.overflow =
+          !appFormModal.hidden || !settingsModal.hidden || !confirmModal.hidden || !alertModal.hidden ? "hidden" : "";
+      }
+
+      function syncSkinCards() {
+        skinPickGrid.querySelectorAll(".skin-card").forEach(function (btn) {
+          btn.classList.toggle("is-active", btn.getAttribute("data-skin") === pendingSkin);
+        });
+      }
+
+      function openSettingsModal() {
+        settingsErr.textContent = "";
+        pendingSkin = (state && state.skin) || "neon";
+        settingsModal.hidden = false;
+        updateBodyScrollLock();
+        syncSkinCards();
+      }
+
+      function closeSettingsModal() {
+        settingsModal.hidden = true;
+        settingsErr.textContent = "";
+        updateBodyScrollLock();
+      }
+
+      function openAlertModal(title, message) {
+        document.getElementById("alertTitle").textContent = title;
+        document.getElementById("alertMessage").textContent = message;
+        document.getElementById("alertError").textContent = "";
+        alertModal.hidden = false;
+        updateBodyScrollLock();
+      }
+
+      function closeAlertModal() {
+        alertModal.hidden = true;
+        updateBodyScrollLock();
+      }
+
+      function render(s) {
+        if (!s) return;
+        state = s;
+        statusEl.textContent = s.status_text || "";
+        statusEl.className = "status status--" + (s.status_kind || "ok");
+        if (document.activeElement !== searchEl) {
+          searchEl.value = s.search || "";
+        }
+        const running = new Set(s.running_ids || []);
+        const launching = new Set(s.launching_ids || []);
+        const sel = s.selected_id;
+        let html = "";
+        for (const slot of s.slots || []) {
+          const i = slot.index;
+          const app = slot.app;
+          const empty = !app;
+          const selected = !empty && sel && app.id === sel;
+          const rb = String(i % 8);
+          let meta = "";
+          if (!empty) {
+            if (launching.has(app.id)) meta = '<div class="meta">正在启动…</div>';
+            else if (running.has(app.id)) meta = '<div class="meta">运行中</div>';
+          }
+          const cls = ["card"];
+          if (empty) cls.push("card--empty");
+          if (selected) cls.push("card--selected");
+          const badge = '<span class="badge-pending"></span>';
+          const title = empty ? "空位" : esc(app.name);
+          const path = empty ? "点击打开添加界面" : esc(app.path);
+          const actions = empty
+            ? ""
+            : '<div class="actions">' +
+              '<button type="button" class="primary" data-launch="' +
+              esc(app.id) +
+              '">启动</button>' +
+              '<button type="button" class="danger" data-close="' +
+              esc(app.id) +
+              '"' +
+              (running.has(app.id) ? "" : " disabled") +
+              ">关闭</button></div>";
+          html +=
+            '<article class="' +
+            cls.join(" ") +
+            '" data-slot="' +
+            i +
+            '"' +
+            (selected ? ' data-rainbow="' + rb + '"' : "") +
+            ">" +
+            badge +
+            "<h3>" +
+            title +
+            "</h3>" +
+            meta +
+            "<p>" +
+            path +
+            "</p>" +
+            actions +
+            "</article>";
+        }
+        gridEl.innerHTML = html;
+        applySkin(s.skin);
+      }
+
+      function getSelectedApp() {
+        if (!state || !state.selected_id) return null;
+        for (let i = 0; i < (state.slots || []).length; i++) {
+          const sl = state.slots[i];
+          if (sl.app && sl.app.id === state.selected_id) return sl.app;
+        }
+        return null;
+      }
+
+      function openAppModal(mode) {
+        fError.textContent = "";
+        formEditId = null;
+        if (mode === "add") {
+          formTitle.textContent = "添加应用";
+          formSub.textContent = "填写名称与可执行路径；可选工作目录、图标路径与备注。";
+          fName.value = "";
+          fPath.value = "";
+          fWd.value = "";
+          fIcon.value = "";
+          fDesc.value = "";
+        } else {
+          const app = getSelectedApp();
+          if (!app) {
+            statusEl.textContent = "请先单击选中一个应用卡片，再点「编辑」";
+            statusEl.className = "status status--warn";
+            setTimeout(function () {
+              if (!state) return;
+              statusEl.textContent = state.status_text || "";
+              statusEl.className = "status status--" + (state.status_kind || "ok");
+            }, 2400);
+            return;
+          }
+          formEditId = app.id;
+          formTitle.textContent = "编辑应用";
+          formSub.textContent = "修改名称、路径或可选字段后保存。";
+          fName.value = app.name || "";
+          fPath.value = app.path || "";
+          fWd.value = app.working_dir || "";
+          fIcon.value = app.icon || "";
+          fDesc.value = app.description || "";
+        }
+        appFormModal.hidden = false;
+        updateBodyScrollLock();
+        setTimeout(function () {
+          fName.focus();
+        }, 40);
+      }
+
+      function closeAppModal() {
+        appFormModal.hidden = true;
+        updateBodyScrollLock();
+        formEditId = null;
+        fError.textContent = "";
+      }
+
+      async function refreshFromServer() {
+        const s = await api("load");
+        if (s) render(s);
+      }
+
+      function bindGrid() {
+        gridEl.addEventListener("click", async function (ev) {
+          const t = ev.target;
+          if (t.closest(".actions")) {
+            const lid = t.getAttribute("data-launch");
+            const cid = t.getAttribute("data-close");
+            if (lid) {
+              const s = await api("launch", lid);
+              if (s) render(s);
+            } else if (cid && !t.disabled) {
+              const confirmed = await showConfirm("确认关闭", "确定要关闭这个应用吗？");
+              if (confirmed) {
+                const s = await api("close", cid);
+                if (s) render(s);
+              }
+            }
+            return;
+          }
+          const card = t.closest(".card");
+          if (!card) return;
+          if (card.classList.contains("card--empty")) {
+            openAppModal("add");
+            return;
+          }
+          const slot = Number(card.getAttribute("data-slot"));
+          const slotData = state && state.slots && state.slots[slot];
+          const appId = slotData && slotData.app ? slotData.app.id : null;
+          const s = await api("select", appId);
+          if (s) render(s);
+        });
+        gridEl.addEventListener("dblclick", async function (ev) {
+          if (ev.target.closest(".actions")) return;
+          const card = ev.target.closest(".card");
+          if (!card) return;
+          if (card.classList.contains("card--empty")) {
+            openAppModal("add");
+            return;
+          }
+          const slot = Number(card.getAttribute("data-slot"));
+          const slotData = state && state.slots && state.slots[slot];
+          if (!slotData || !slotData.app) return;
+          const s = await api("launch", slotData.app.id);
+          if (s) render(s);
+        });
+      }
+
+      searchEl.addEventListener("input", function () {
+        clearTimeout(searchDebounce);
+        const v = searchEl.value;
+        searchDebounce = setTimeout(async function () {
+          const s = await api("search", v);
+          if (s) render(s);
+        }, 120);
+      });
+
+      document.querySelector(".dock").addEventListener("click", async function (ev) {
+        const btn = ev.target.closest("button[data-act]");
+        if (!btn) return;
+        const act = btn.getAttribute("data-act");
+        if (act === "add") {
+          openAppModal("add");
+          return;
+        }
+        if (act === "edit") {
+          openAppModal("edit");
+          return;
+        }
+        if (act === "settings") {
+          openSettingsModal();
+          return;
+        }
+        let s = null;
+        if (act === "del") s = await api("delete_app");
+        else if (act === "refresh") s = await api("refresh");
+        else if (act === "up") s = await api("move_up");
+        else if (act === "down") s = await api("move_down");
+        if (s) render(s);
+      });
+
+      function bindFormModal() {
+        appFormModal.addEventListener("click", function (ev) {
+          if (ev.target.closest("[data-form-close]")) closeAppModal();
+        });
+        document.getElementById("fBrowse").addEventListener("click", async function () {
+          fError.textContent = "";
+          const p = await api("pick_executable");
+          if (p) fPath.value = p;
+        });
+        document.getElementById("fSave").addEventListener("click", async function () {
+          fError.textContent = "";
+          const payload = {
+            name: fName.value,
+            path: fPath.value,
+            working_dir: fWd.value,
+            icon: fIcon.value,
+            description: fDesc.value,
+          };
+          if (formEditId) payload.id = formEditId;
+          const s = await api("save_app_form", payload);
+          if (!s) return;
+          if (s.form_error) {
+            fError.textContent = s.form_error;
+            delete s.form_error;
+            render(s);
+            return;
+          }
+          closeAppModal();
+          render(s);
+        });
+      }
+
+      function bindGlobalEscape() {
+        document.addEventListener("keydown", function (ev) {
+          if (ev.key !== "Escape") return;
+          if (!settingsModal.hidden) {
+            ev.preventDefault();
+            closeSettingsModal();
+            return;
+          }
+          if (!appFormModal.hidden) {
+            ev.preventDefault();
+            closeAppModal();
+            return;
+          }
+          if (!confirmModal.hidden) {
+            ev.preventDefault();
+            resolveConfirm(false);
+            return;
+          }
+          if (!alertModal.hidden) {
+            ev.preventDefault();
+            closeAlertModal();
+          }
+        });
+      }
+
+      function bindSettingsModal() {
+        settingsModal.addEventListener("click", function (ev) {
+          if (ev.target.closest("[data-settings-close]")) closeSettingsModal();
+        });
+        skinPickGrid.addEventListener("click", function (ev) {
+          const card = ev.target.closest(".skin-card");
+          if (!card) return;
+          pendingSkin = card.getAttribute("data-skin") || "neon";
+          syncSkinCards();
+        });
+        document.getElementById("settingsSave").addEventListener("click", async function () {
+          settingsErr.textContent = "";
+          const s = await api("save_ui_settings", { skin: pendingSkin });
+          if (!s) return;
+          if (s.ui_error) {
+            settingsErr.textContent = s.ui_error;
+            return;
+          }
+          closeSettingsModal();
+          render(s);
+        });
+      }
+
+      function bindConfirmAlert() {
+        confirmModal.addEventListener("click", function (ev) {
+          if (ev.target.closest("[data-confirm-close]")) resolveConfirm(false);
+          if (ev.target.id === "confirmOk") resolveConfirm(true);
+        });
+        alertModal.addEventListener("click", function (ev) {
+          if (ev.target.closest("[data-alert-close]")) closeAlertModal();
+        });
+      }
+
+      function start() {
+        if (started) return;
+        if (!window.pywebview || !window.pywebview.api) return;
+        started = true;
+        noBridgeEl.hidden = true;
+        refreshFromServer();
+        setInterval(function () {
+          if (!window.pywebview || !window.pywebview.api) return;
+          api("get_state").then(function (s) {
+            if (s && state) {
+              const a =
+                JSON.stringify(s.launching_ids) +
+                JSON.stringify(s.running_ids) +
+                s.status_text +
+                (s.skin || "");
+              const b =
+                JSON.stringify(state.launching_ids) +
+                JSON.stringify(state.running_ids) +
+                state.status_text +
+                (state.skin || "");
+              if (a !== b) render(s);
+            }
+          });
+        }, 600);
+      }
+
+      window.addEventListener("pywebviewready", start);
+      setTimeout(function () {
+        start();
+        if (!started) noBridgeEl.hidden = false;
+      }, 1200);
+      bindGrid();
+      bindFormModal();
+      bindSettingsModal();
+      bindConfirmAlert();
+      bindGlobalEscape();
+    })();
+  </script>
+</body>
+</html>

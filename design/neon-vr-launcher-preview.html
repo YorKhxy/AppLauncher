@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VrLauncher · 深色霓虹 · 设计表现稿</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --void: #030712;
+      --surface: #0b1224;
+      --elev: #111c33;
+      --cyan: #22d3ee;
+      --cyan-dim: #0891b2;
+      --magenta: #e879f9;
+      --violet: #a78bfa;
+      --rose: #fb7185;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --grid-line: rgba(34, 211, 238, 0.07);
+      --glow-cyan: rgba(34, 211, 238, 0.45);
+      --glow-magenta: rgba(232, 121, 249, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+
+    body {
+      font-family: "Exo 2", system-ui, sans-serif;
+      background: var(--void);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* 大气：径向光晕 + 细噪 */
+    .atmosphere {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 120% 80% at 10% -10%, rgba(167, 139, 250, 0.18), transparent 50%),
+        radial-gradient(ellipse 90% 60% at 95% 100%, rgba(34, 211, 238, 0.12), transparent 45%),
+        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(232, 121, 249, 0.06), transparent 70%);
+    }
+    .atmosphere::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0.35;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+
+    /* 透视网格（轻微倾斜，避免「平面网页」感） */
+    .grid-floor {
+      position: fixed;
+      left: -20%;
+      right: -20%;
+      bottom: -15%;
+      height: 55vh;
+      transform-origin: 50% 100%;
+      transform: perspective(420px) rotateX(58deg) scale(1.15);
+      z-index: 0;
+      background:
+        linear-gradient(to top, var(--void) 0%, transparent 38%),
+        repeating-linear-gradient(90deg, var(--grid-line) 0 1px, transparent 1px 48px),
+        repeating-linear-gradient(0deg, var(--grid-line) 0 1px, transparent 1px 48px);
+      mask-image: linear-gradient(to top, black 0%, transparent 92%);
+      -webkit-mask-image: linear-gradient(to top, black 0%, transparent 92%);
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 2.25rem 1.75rem 6rem;
+      min-height: 100%;
+    }
+
+    .chrome {
+      border: 1px solid rgba(34, 211, 238, 0.35);
+      border-radius: 22px;
+      background: linear-gradient(165deg, rgba(17, 28, 51, 0.92) 0%, rgba(11, 18, 36, 0.96) 100%);
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        0 24px 80px rgba(0, 0, 0, 0.55),
+        0 0 120px rgba(34, 211, 238, 0.06);
+      padding: 1.5rem 1.75rem 1.25rem;
+    }
+
+    .head-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.1rem;
+    }
+    .head-row h1 {
+      margin: 0;
+      font-family: Orbitron, sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.35rem, 3.5vw, 1.85rem);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: linear-gradient(105deg, var(--text) 0%, var(--cyan) 55%, var(--violet) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 40px var(--glow-cyan);
+    }
+    .head-row .status {
+      font-family: Orbitron, sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      max-width: 520px;
+      margin-left: auto;
+      margin-bottom: 1rem;
+      padding: 0.55rem 1rem;
+      border-radius: 999px;
+      background: rgba(7, 13, 26, 0.9);
+      border: 1px solid rgba(34, 211, 238, 0.55);
+      box-shadow: 0 0 24px rgba(34, 211, 238, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+    .search span {
+      font-size: 1.1rem;
+      color: var(--cyan);
+      line-height: 1;
+    }
+    .search input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: "Exo 2", sans-serif;
+      font-size: 0.95rem;
+    }
+    .search input::placeholder { color: var(--muted); }
+
+    .section-hint {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--cyan-dim);
+      margin-bottom: 0.75rem;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem 0.65rem;
+    }
+    @media (max-width: 900px) {
+      .card-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .card {
+      position: relative;
+      border-radius: 14px;
+      padding: 0.85rem 0.75rem 0.7rem;
+      min-height: 132px;
+      background: linear-gradient(180deg, var(--elev) 0%, rgba(15, 23, 42, 0.65) 100%);
+      border: 1px solid rgba(51, 65, 85, 0.9);
+      transition: transform 0.2s ease, box-shadow 0.25s ease;
+      cursor: pointer;
+    }
+    .card:hover:not(.card--selected) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+      border-color: rgba(34, 211, 238, 0.25);
+    }
+
+    .card h3 {
+      margin: 0 0 0.35rem;
+      font-family: Orbitron, sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .card p {
+      margin: 0 0 0.65rem;
+      font-size: 0.68rem;
+      color: var(--muted);
+      line-height: 1.35;
+      word-break: break-all;
+    }
+    .card .actions {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .card button {
+      flex: 1;
+      font-family: "Exo 2", sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.35rem 0.25rem;
+      border-radius: 8px;
+      border: 1px solid rgba(71, 85, 105, 0.8);
+      background: rgba(15, 23, 42, 0.85);
+      color: var(--muted);
+      cursor: default;
+    }
+    .card button.primary {
+      border-color: rgba(34, 211, 238, 0.55);
+      color: var(--cyan);
+    }
+    .card button.danger {
+      border-color: rgba(251, 113, 133, 0.45);
+      color: var(--rose);
+    }
+
+    .card--empty h3 { color: var(--muted); }
+    .card--empty p { font-style: italic; opacity: 0.85; }
+
+    .card .badge-pending {
+      display: none;
+    }
+    .card--selected .badge-pending {
+      display: block;
+    }
+
+    /* —— 选中框：按槽位彩虹段（0 赤 → 7 紫），描边不旋转；切换选中时颜色/光晕过渡「带过去」—— */
+    .card--selected {
+      border-color: transparent;
+      isolation: isolate;
+    }
+    .card--selected::before {
+      content: "";
+      position: absolute;
+      inset: -3px;
+      border-radius: 16px;
+      padding: 2px;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: border-neon 2.6s ease-in-out infinite;
+      z-index: -1;
+      transition: background 0.55s ease, filter 0.45s ease, opacity 0.35s ease;
+    }
+    .card--selected::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: 18px;
+      z-index: -2;
+      background: transparent;
+      animation: pulse-halo 1.8s ease-in-out infinite;
+      transition: box-shadow 0.55s ease, opacity 0.35s ease;
+    }
+
+    /* 槽位彩虹：每格以该色相为主做锥形渐变（非整圈乱色） */
+    .card--selected[data-rainbow="0"]::before {
+      background: conic-gradient(from 0deg, #7f1d1d, #dc2626, #f87171, #fb923c, #dc2626, #7f1d1d);
+    }
+    .card--selected[data-rainbow="0"]::after {
+      box-shadow: 0 0 22px rgba(220, 38, 38, 0.55), 0 0 52px rgba(251, 146, 60, 0.28);
+    }
+
+    .card--selected[data-rainbow="1"]::before {
+      background: conic-gradient(from 0deg, #9a3412, #ea580c, #fb923c, #fbbf24, #ea580c, #9a3412);
+    }
+    .card--selected[data-rainbow="1"]::after {
+      box-shadow: 0 0 22px rgba(234, 88, 12, 0.5), 0 0 50px rgba(251, 191, 36, 0.25);
+    }
+
+    .card--selected[data-rainbow="2"]::before {
+      background: conic-gradient(from 0deg, #a16207, #ca8a04, #facc15, #fde047, #eab308, #a16207);
+    }
+    .card--selected[data-rainbow="2"]::after {
+      box-shadow: 0 0 22px rgba(234, 179, 8, 0.5), 0 0 48px rgba(253, 224, 71, 0.28);
+    }
+
+    .card--selected[data-rainbow="3"]::before {
+      background: conic-gradient(from 0deg, #14532d, #16a34a, #4ade80, #86efac, #22c55e, #14532d);
+    }
+    .card--selected[data-rainbow="3"]::after {
+      box-shadow: 0 0 22px rgba(34, 197, 94, 0.45), 0 0 48px rgba(134, 239, 172, 0.22);
+    }
+
+    .card--selected[data-rainbow="4"]::before {
+      background: conic-gradient(from 0deg, #134e4a, #0d9488, #2dd4bf, #5eead4, #14b8a6, #134e4a);
+    }
+    .card--selected[data-rainbow="4"]::after {
+      box-shadow: 0 0 22px rgba(20, 184, 166, 0.5), 0 0 50px rgba(45, 212, 191, 0.25);
+    }
+
+    .card--selected[data-rainbow="5"]::before {
+      background: conic-gradient(from 0deg, #1e3a8a, #2563eb, #60a5fa, #93c5fd, #3b82f6, #1e3a8a);
+    }
+    .card--selected[data-rainbow="5"]::after {
+      box-shadow: 0 0 22px rgba(37, 99, 235, 0.5), 0 0 52px rgba(147, 197, 253, 0.22);
+    }
+
+    .card--selected[data-rainbow="6"]::before {
+      background: conic-gradient(from 0deg, #312e81, #4f46e5, #818cf8, #a5b4fc, #6366f1, #312e81);
+    }
+    .card--selected[data-rainbow="6"]::after {
+      box-shadow: 0 0 22px rgba(79, 70, 229, 0.48), 0 0 50px rgba(165, 180, 252, 0.22);
+    }
+
+    .card--selected[data-rainbow="7"]::before {
+      background: conic-gradient(from 0deg, #581c87, #a855f7, #d946ef, #e879f9, #9333ea, #581c87);
+    }
+    .card--selected[data-rainbow="7"]::after {
+      box-shadow: 0 0 22px rgba(168, 85, 247, 0.48), 0 0 52px rgba(232, 121, 249, 0.25);
+    }
+
+    /* 未带 data-rainbow 时默认赤段（与槽 0 一致） */
+    .card--selected:not([data-rainbow])::before {
+      background: conic-gradient(from 0deg, #7f1d1d, #dc2626, #f87171, #fb923c, #dc2626, #7f1d1d);
+    }
+    .card--selected:not([data-rainbow])::after {
+      box-shadow: 0 0 22px rgba(220, 38, 38, 0.55), 0 0 52px rgba(251, 146, 60, 0.28);
+    }
+
+    @keyframes border-neon {
+      0%, 100% {
+        filter: saturate(1) brightness(1);
+        opacity: 0.92;
+      }
+      50% {
+        filter: saturate(1.18) brightness(1.06);
+        opacity: 1;
+      }
+    }
+    @keyframes pulse-halo {
+      0%, 100% { opacity: 0.45; }
+      50% { opacity: 0.95; }
+    }
+
+    .badge-pending {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      font-family: Orbitron, sans-serif;
+      font-size: 0.48rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      padding: 0.2rem 0.3rem;
+      max-width: calc(100% - 12px);
+      text-align: right;
+      white-space: nowrap;
+      border-radius: 4px;
+      color: var(--magenta);
+      background: rgba(24, 11, 40, 0.92);
+      border: 1px dashed rgba(232, 121, 249, 0.65);
+      animation: badge-blink 2s ease-in-out infinite;
+    }
+    @keyframes badge-blink {
+      0%, 100% { opacity: 0.65; }
+      50% { opacity: 1; }
+    }
+
+    .dock {
+      position: fixed;
+      left: 50%;
+      bottom: 1.25rem;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 16px;
+      background: rgba(7, 9, 20, 0.92);
+      border: 1px solid rgba(167, 139, 250, 0.45);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 32px rgba(34, 211, 238, 0.08);
+      backdrop-filter: blur(10px);
+    }
+    .dock button {
+      font-family: "Exo 2", sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.45rem 0.75rem;
+      border-radius: 10px;
+      border: 1px solid rgba(71, 85, 105, 0.85);
+      background: rgba(16, 27, 51, 0.95);
+      color: var(--text);
+    }
+    .dock button.accent {
+      border-color: rgba(34, 211, 238, 0.65);
+      color: var(--cyan);
+      box-shadow: 0 0 18px rgba(34, 211, 238, 0.2);
+    }
+    .dock .sep {
+      font-family: Orbitron, sans-serif;
+      font-size: 0.58rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      margin: 0 0.15rem;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="atmosphere" aria-hidden="true"></div>
+  <div class="grid-floor" aria-hidden="true"></div>
+
+  <div class="shell">
+    <div class="chrome">
+      <div class="head-row">
+        <h1>VR Launcher</h1>
+        <span class="status">Status</span>
+      </div>
+
+      <div class="search">
+        <span aria-hidden="true">⌕</span>
+        <input type="text" placeholder="筛选应用…" readonly />
+      </div>
+
+      <p class="section-hint">已固定应用 · 4×2 霓虹栅格</p>
+
+      <div class="card-grid">
+        <article class="card card--selected" data-slot="0" data-rainbow="0">
+          <span class="badge-pending">待动效</span>
+          <h3>中控</h3>
+          <p>C:\Apps\control.exe</p>
+          <div class="actions">
+            <button type="button" class="primary">启动</button>
+            <button type="button" class="danger">关闭</button>
+          </div>
+        </article>
+        <article class="card" data-slot="1">
+          <span class="badge-pending">待动效</span>
+          <h3>建议中控</h3>
+          <p>C:\Tools\suggest.exe</p>
+          <div class="actions">
+            <button type="button" class="primary">启动</button>
+            <button type="button" class="danger">关闭</button>
+          </div>
+        </article>
+        <article class="card card--empty" data-slot="2">
+          <span class="badge-pending">待动效</span>
+          <h3>空位</h3>
+          <p>预留槽位</p>
+        </article>
+        <article class="card card--empty" data-slot="3">
+          <span class="badge-pending">待动效</span>
+          <h3>空位</h3>
+          <p>预留槽位</p>
+        </article>
+        <article class="card card--empty" data-slot="4">
+          <span class="badge-pending">待动效</span>
+          <h3>空位</h3>
+          <p>下行四格</p>
+        </article>
+        <article class="card card--empty" data-slot="5">
+          <span class="badge-pending">待动效</span>
+          <h3>空位</h3>
+          <p>下行四格</p>
+        </article>
+        <article class="card card--empty" data-slot="6">
+          <span class="badge-pending">待动效</span>
+          <h3>空位</h3>
+          <p>下行四格</p>
+        </article>
+        <article class="card card--empty" data-slot="7">
+          <span class="badge-pending">待动效</span>
+          <h3>空位</h3>
+          <p>下行四格</p>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <nav class="dock" aria-label="底栏">
+    <button type="button" class="accent">＋ 添加应用</button>
+    <button type="button">编辑</button>
+    <button type="button">删除</button>
+    <button type="button">刷新</button>
+    <span class="sep">排序</span>
+    <button type="button">上移</button>
+    <button type="button">下移</button>
+  </nav>
+
+  <script>
+    (function () {
+      const grid = document.querySelector(".card-grid");
+      if (!grid) return;
+      const names = ["赤", "橙", "黄", "绿", "青", "蓝", "靛", "紫"];
+      grid.querySelectorAll(".card").forEach((card) => {
+        card.addEventListener("click", function (ev) {
+          if (ev.target.closest(".actions")) return;
+          const slot = Number(card.dataset.slot) || 0;
+          grid.querySelectorAll(".card").forEach((c) => {
+            c.classList.remove("card--selected");
+            c.removeAttribute("data-rainbow");
+          });
+          card.classList.add("card--selected");
+          card.setAttribute("data-rainbow", String(slot % 8));
+          const b = card.querySelector(".badge-pending");
+          if (b) b.textContent = "待动效 · " + names[slot % 8];
+        });
+      });
+      const first = grid.querySelector(".card--selected .badge-pending");
+      if (first) first.textContent = "待动效 · 赤";
+    })();
+  </script>
+</body>
+</html>
