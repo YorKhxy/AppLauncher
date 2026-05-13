@@ -234,8 +234,6 @@
     .card--add-new:hover p {
       opacity: 1;
     }
-    .card .badge-pending { display: none; }
-    .card--selected .badge-pending { display: block; }
     .card--selected {
       border-color: transparent;
       isolation: isolate;
@@ -286,25 +284,6 @@
     @keyframes pulse-halo {
       0%, 100% { opacity: 0.45; }
       50% { opacity: 0.95; }
-    }
-    .badge-pending {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      font-family: Orbitron, sans-serif;
-      font-size: 0.48rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      padding: 0.2rem 0.3rem;
-      border-radius: 4px;
-      color: var(--magenta);
-      background: rgba(24, 11, 40, 0.92);
-      border: 1px dashed rgba(232, 121, 249, 0.65);
-      animation: badge-blink 2s ease-in-out infinite;
-    }
-    @keyframes badge-blink {
-      0%, 100% { opacity: 0.65; }
-      50% { opacity: 1; }
     }
     .dock {
       position: fixed;
@@ -924,7 +903,6 @@
           else if (running.has(app.id)) meta = '<div class="meta">运行中</div>';
           const cls = ["card"];
           if (selected) cls.push("card--selected");
-          const badge = '<span class="badge-pending"></span>';
           const title = esc(app.name);
           const path = esc(app.path);
           const actions = 
@@ -934,7 +912,7 @@
           html +=
             '<article class="' + cls.join(" ") + '" data-slot="' + i + '"' +
             (selected ? ' data-rainbow="' + rb + '"' : "") + ">" +
-            badge + "<h3>" + title + "</h3>" + meta + "<p>" + path + "</p>" + actions + "</article>";
+            "<h3>" + title + "</h3>" + meta + "<p>" + path + "</p>" + actions + "</article>";
         }
         html +=
           '<article class="card card--add-new" data-action="add-new">' +
