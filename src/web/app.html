@@ -84,7 +84,7 @@
         0 0 0 1px rgba(0, 0, 0, 0.5),
         0 24px 80px rgba(0, 0, 0, 0.55),
         0 0 120px var(--chrome-glow-outer);
-      padding: 1.5rem 1.75rem 1.25rem;
+      padding: 2rem 2rem 1.75rem;
     }
     .head-row {
       display: flex;
@@ -147,11 +147,12 @@
     }
     .card-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 0.75rem 0.65rem;
-    }
-    @media (max-width: 900px) {
-      .card-grid { grid-template-columns: repeat(2, 1fr); }
+      max-height: calc(100vh - 300px);
+      overflow-y: auto;
+      padding: 8px;
+      margin: -8px;
     }
     .card {
       position: relative;
@@ -195,8 +196,44 @@
     .card button:disabled { opacity: 0.45; cursor: default; }
     .card--empty h3 { color: var(--muted); }
     .card--empty p { font-style: italic; opacity: 0.85; }
-    .card .badge-pending { display: none; }
-    .card--selected .badge-pending { display: block; }
+    .card--add-new {
+      border-style: dashed;
+      border-color: rgba(71, 85, 105, 0.6);
+      background: linear-gradient(180deg, rgba(17, 28, 51, 0.5) 0%, rgba(11, 18, 36, 0.3) 100%);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 132px;
+      transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    .card--add-new:hover {
+      border-color: var(--cyan);
+      background: linear-gradient(180deg, rgba(17, 28, 51, 0.7) 0%, rgba(11, 18, 36, 0.5) 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+    }
+    .card--add-new h3 {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin: 0;
+      transition: color 0.2s ease;
+    }
+    .card--add-new:hover h3 {
+      color: var(--cyan);
+    }
+    .card--add-new p {
+      color: var(--muted);
+      font-style: italic;
+      opacity: 0.85;
+      margin: 0.35rem 0 0;
+      font-size: 0.68rem;
+      transition: opacity 0.2s ease;
+    }
+    .card--add-new:hover p {
+      opacity: 1;
+    }
     .card--selected {
       border-color: transparent;
       isolation: isolate;
@@ -247,25 +284,6 @@
     @keyframes pulse-halo {
       0%, 100% { opacity: 0.45; }
       50% { opacity: 0.95; }
-    }
-    .badge-pending {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      font-family: Orbitron, sans-serif;
-      font-size: 0.48rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      padding: 0.2rem 0.3rem;
-      border-radius: 4px;
-      color: var(--magenta);
-      background: rgba(24, 11, 40, 0.92);
-      border: 1px dashed rgba(232, 121, 249, 0.65);
-      animation: badge-blink 2s ease-in-out infinite;
-    }
-    @keyframes badge-blink {
-      0%, 100% { opacity: 0.65; }
-      50% { opacity: 1; }
     }
     .dock {
       position: fixed;
@@ -654,11 +672,11 @@
             <button type="button" id="fBrowse">浏览</button>
           </div>
         </div>
-        <div class="form-field">
+        <div class="form-field" style="display:none">
           <label for="fWd">工作目录（可选）</label>
           <input id="fWd" type="text" autocomplete="off" placeholder="默认可执行文件所在目录" />
         </div>
-        <div class="form-field">
+        <div class="form-field" style="display:none">
           <label for="fIcon">图标路径（可选）</label>
           <input id="fIcon" type="text" autocomplete="off" placeholder="" />
         </div>
@@ -877,50 +895,30 @@
         for (const slot of s.slots || []) {
           const i = slot.index;
           const app = slot.app;
-          const empty = !app;
-          const selected = !empty && sel && app.id === sel;
+          if (!app) continue;
+          const selected = sel && app.id === sel;
           const rb = String(i % 8);
           let meta = "";
-          if (!empty) {
-            if (launching.has(app.id)) meta = '<div class="meta">正在启动…</div>';
-            else if (running.has(app.id)) meta = '<div class="meta">运行中</div>';
-          }
+          if (launching.has(app.id)) meta = '<div class="meta">正在启动…</div>';
+          else if (running.has(app.id)) meta = '<div class="meta">运行中</div>';
           const cls = ["card"];
-          if (empty) cls.push("card--empty");
           if (selected) cls.push("card--selected");
-          const badge = '<span class="badge-pending"></span>';
-          const title = empty ? "空位" : esc(app.name);
-          const path = empty ? "点击打开添加界面" : esc(app.path);
-          const actions = empty
-            ? ""
-            : '<div class="actions">' +
-              '<button type="button" class="primary" data-launch="' +
-              esc(app.id) +
-              '">启动</button>' +
-              '<button type="button" class="danger" data-close="' +
-              esc(app.id) +
-              '"' +
-              (running.has(app.id) ? "" : " disabled") +
-              ">关闭</button></div>";
+          const title = esc(app.name);
+          const path = esc(app.path);
+          const actions = 
+            '<div class="actions">' +
+              '<button type="button" class="primary" data-launch="' + esc(app.id) + '">启动</button>' +
+              '<button type="button" class="danger" data-close="' + esc(app.id) + '"' + (running.has(app.id) ? "" : " disabled") + ">关闭</button></div>";
           html +=
-            '<article class="' +
-            cls.join(" ") +
-            '" data-slot="' +
-            i +
-            '"' +
-            (selected ? ' data-rainbow="' + rb + '"' : "") +
-            ">" +
-            badge +
-            "<h3>" +
-            title +
-            "</h3>" +
-            meta +
-            "<p>" +
-            path +
-            "</p>" +
-            actions +
-            "</article>";
+            '<article class="' + cls.join(" ") + '" data-slot="' + i + '"' +
+            (selected ? ' data-rainbow="' + rb + '"' : "") + ">" +
+            "<h3>" + title + "</h3>" + meta + "<p>" + path + "</p>" + actions + "</article>";
         }
+        html +=
+          '<article class="card card--add-new" data-action="add-new">' +
+            '<h3>+ 添加应用</h3>' +
+            '<p>点击添加新应用</p>' +
+          '</article>';
         gridEl.innerHTML = html;
         applySkin(s.skin);
       }
@@ -1005,7 +1003,7 @@
           }
           const card = t.closest(".card");
           if (!card) return;
-          if (card.classList.contains("card--empty")) {
+          if (card.classList.contains("card--add-new")) {
             openAppModal("add");
             return;
           }
@@ -1019,8 +1017,7 @@
           if (ev.target.closest(".actions")) return;
           const card = ev.target.closest(".card");
           if (!card) return;
-          if (card.classList.contains("card--empty")) {
-            openAppModal("add");
+          if (card.classList.contains("card--add-new")) {
             return;
           }
           const slot = Number(card.getAttribute("data-slot"));

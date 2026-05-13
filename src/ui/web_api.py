@@ -102,19 +102,10 @@ class LauncherApi:
             self.selected_app_id = None
 
     def _slots(self) -> List[Optional[AppItem]]:
-        take = self.displayed_apps[:8]
-        pad = 8 - len(take)
-        return list(take) + [None] * pad
+        return list(self.displayed_apps)
 
     def get_state(self) -> Dict[str, Any]:
-        slots = []
-        for i, app in enumerate(self._slots()):
-            slots.append(
-                {
-                    "index": i,
-                    "app": app.to_dict() if app else None,
-                }
-            )
+        slots = [{"index": i, "app": app.to_dict()} for i, app in enumerate(self._slots())]
         return {
             "slots": slots,
             "selected_id": self.selected_app_id,
@@ -124,6 +115,7 @@ class LauncherApi:
             "status_kind": self.status_kind,
             "search": self._search_raw,
             "skin": self.ui_settings.load()["skin"],
+            "total_count": len(self.displayed_apps),
         }
 
     def save_ui_settings(self, data: Any) -> Dict[str, Any]:
