@@ -36,6 +36,7 @@
     }
 
     /* 滚动条与深色霓虹主题统一（WebKit / Blink + Firefox） */
+    .shell,
     .card-grid,
     #customGroupsRoot,
     .form-modal,
@@ -46,6 +47,7 @@
       scrollbar-color: color-mix(in srgb, var(--cyan) 50%, transparent)
         color-mix(in srgb, var(--void) 92%, var(--surface));
     }
+    .shell::-webkit-scrollbar,
     .card-grid::-webkit-scrollbar,
     #customGroupsRoot::-webkit-scrollbar,
     .form-modal::-webkit-scrollbar,
@@ -55,6 +57,7 @@
       width: 8px;
       height: 8px;
     }
+    .shell::-webkit-scrollbar-track,
     .card-grid::-webkit-scrollbar-track,
     #customGroupsRoot::-webkit-scrollbar-track,
     .form-modal::-webkit-scrollbar-track,
@@ -65,6 +68,7 @@
       border-radius: 100px;
       box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cyan) 14%, transparent);
     }
+    .shell::-webkit-scrollbar-thumb,
     .card-grid::-webkit-scrollbar-thumb,
     #customGroupsRoot::-webkit-scrollbar-thumb,
     .form-modal::-webkit-scrollbar-thumb,
@@ -79,6 +83,7 @@
         color-mix(in srgb, var(--violet) 42%, transparent)
       );
     }
+    .shell::-webkit-scrollbar-thumb:hover,
     .card-grid::-webkit-scrollbar-thumb:hover,
     #customGroupsRoot::-webkit-scrollbar-thumb:hover,
     .form-modal::-webkit-scrollbar-thumb:hover,
@@ -87,6 +92,7 @@
     .picker-list::-webkit-scrollbar-thumb:hover {
       background: color-mix(in srgb, var(--cyan) 72%, transparent);
     }
+    .shell::-webkit-scrollbar-button,
     .card-grid::-webkit-scrollbar-button,
     #customGroupsRoot::-webkit-scrollbar-button,
     .form-modal::-webkit-scrollbar-button,
@@ -97,6 +103,7 @@
       width: 0;
       height: 0;
     }
+    .shell::-webkit-scrollbar-corner,
     .card-grid::-webkit-scrollbar-corner,
     #customGroupsRoot::-webkit-scrollbar-corner,
     .form-modal::-webkit-scrollbar-corner,
@@ -106,12 +113,26 @@
       background: transparent;
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
+    html {
+      position: fixed;
+      inset: 0;
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
     body {
+      position: fixed;
+      inset: 0;
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      overflow: hidden;
+      overscroll-behavior: none;
       font-family: "Exo 2", system-ui, sans-serif;
       background: var(--void);
       color: var(--text);
-      overflow-x: hidden;
     }
     .atmosphere {
       position: fixed;
@@ -145,9 +166,18 @@
       max-width: 1040px;
       margin: 0 auto;
       padding: 2.25rem 1.75rem 6rem;
-      min-height: 100%;
+      height: 100%;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
     .chrome {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       border: 1px solid var(--chrome-border);
       border-radius: 22px;
       background: linear-gradient(165deg, rgba(17, 28, 51, 0.92) 0%, rgba(11, 18, 36, 0.96) 100%);
@@ -164,6 +194,7 @@
       gap: 0.75rem 1rem;
       margin-bottom: 0.85rem;
       flex-wrap: nowrap;
+      flex-shrink: 0;
     }
     .head-row h1 {
       flex: 0 1 auto;
@@ -238,10 +269,13 @@
     }
     .search input::placeholder { color: var(--muted); }
     .card-grid {
+      flex: 1;
+      min-height: 0;
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 0.75rem 0.65rem;
-      max-height: calc(100vh - 300px);
+      align-content: start;
+      overflow-x: hidden;
       overflow-y: auto;
       padding: 8px;
       margin: -8px;
@@ -673,6 +707,7 @@
       margin: 0 0.15rem;
     }
     .no-bridge {
+      flex-shrink: 0;
       margin-top: 1rem;
       padding: 0.75rem 1rem;
       border-radius: 10px;
@@ -1048,6 +1083,7 @@
       background: rgba(3, 7, 18, 0.55);
       border-radius: 14px;
       border: 1px solid rgba(71, 85, 105, 0.45);
+      flex-shrink: 0;
     }
     .main-tab {
       flex: 1;
@@ -1075,11 +1111,19 @@
     .view-panel[hidden] {
       display: none !important;
     }
+    .view-panel:not([hidden]) {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
     .custom-toolbar {
       display: flex;
       flex-wrap: wrap;
       gap: 0.45rem;
       margin-bottom: 0.85rem;
+      flex-shrink: 0;
     }
     .custom-toolbar button {
       font-family: Orbitron, sans-serif;
@@ -1103,7 +1147,9 @@
       color: var(--muted);
     }
     #customGroupsRoot {
-      max-height: calc(100vh - 320px);
+      flex: 1;
+      min-height: 0;
+      overflow-x: hidden;
       overflow-y: auto;
       padding: 0 2px 6px;
     }
@@ -1687,15 +1733,9 @@
       }
 
       function updateBodyScrollLock() {
-        document.body.style.overflow =
-          !appFormModal.hidden ||
-          !settingsModal.hidden ||
-          !confirmModal.hidden ||
-          !alertModal.hidden ||
-          !groupPickerModal.hidden ||
-          !groupNameModal.hidden
-            ? "hidden"
-            : "";
+        /* 与 CSS 一致：视口不滚动；主列表在 .card-grid / #customGroupsRoot */
+        document.documentElement.style.overflow = "hidden";
+        document.body.style.overflow = "hidden";
       }
 
       function syncSkinCards() {
@@ -2939,6 +2979,7 @@
       bindSettingsModal();
       bindConfirmAlert();
       bindGlobalEscape();
+      updateBodyScrollLock();
     })();
   </script>
 </body>
