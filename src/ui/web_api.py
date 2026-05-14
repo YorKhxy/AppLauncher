@@ -318,6 +318,45 @@ class LauncherApi:
             return None
         return path
 
+    def open_app_folder(self, app_id: str) -> Dict[str, Any]:
+        """在资源管理器中打开本地应用路径所在文件夹（不选中文件）。链接类无操作。"""
+        aid = str(app_id or "").strip()
+        if not aid:
+            return self.get_state()
+        app = self.config_service.get_app_by_id(aid)
+        if not app:
+            return self.get_state()
+        if app.kind == "url":
+            self._set_status("状态：网页链接无本地文件夹", "warn")
+            threading.Timer(1.4, lambda: self._set_status("状态：就绪", "ok")).start()
+            return self.get_state()
+        raw = (app.path or "").strip()
+        if not raw:
+            self._set_status("状态：路径为空", "err")
+            threading.Timer(1.4, lambda: self._set_status("状态：就绪", "ok")).start()
+            return self.get_state()
+        norm = os.path.normpath(os.path.expandvars(raw))
+        if os.path.isfile(norm):
+            folder = os.path.dirname(norm)
+        elif os.path.isdir(norm):
+            folder = norm
+        else:
+            folder = os.path.dirname(norm)
+        if not folder or not os.path.isdir(folder):
+            self._set_status("状态：目标文件夹不存在", "err")
+            threading.Timer(1.6, lambda: self._set_status("状态：就绪", "ok")).start()
+            return self.get_state()
+        try:
+            os.startfile(folder)
+        except OSError as e:
+            print(f"打开文件夹失败: {e}")
+            self._set_status("状态：打开文件夹失败", "err")
+            threading.Timer(1.6, lambda: self._set_status("状态：就绪", "ok")).start()
+            return self.get_state()
+        self._set_status("状态：已打开所在文件夹", "ok")
+        threading.Timer(1.2, lambda: self._set_status("状态：就绪", "ok")).start()
+        return self.get_state()
+
     def save_app_form(self, data: Any) -> Dict[str, Any]:
         def err(msg: str) -> Dict[str, Any]:
             return {**self.get_state(), "form_error": msg}

@@ -6,7 +6,6 @@ from typing import Any, Dict, Optional
 ALLOWED_SKINS = ("neon", "ember", "aurora", "shadow")
 DEFAULT_SKIN = "neon"
 DEFAULT_REORDER_LONG_PRESS_SEC = 3.0
-MIN_REORDER_LONG_PRESS_SEC = 1.0
 MAX_REORDER_LONG_PRESS_SEC = 8.0
 
 
@@ -35,8 +34,10 @@ class UiSettingsService:
         try:
             x = float(value)
         except (TypeError, ValueError):
-            x = DEFAULT_REORDER_LONG_PRESS_SEC
-        return max(MIN_REORDER_LONG_PRESS_SEC, min(MAX_REORDER_LONG_PRESS_SEC, x))
+            return DEFAULT_REORDER_LONG_PRESS_SEC
+        if x <= 0:
+            return DEFAULT_REORDER_LONG_PRESS_SEC
+        return min(MAX_REORDER_LONG_PRESS_SEC, x)
 
     def _read_disk(self) -> Dict[str, Any]:
         if not os.path.exists(self._path):

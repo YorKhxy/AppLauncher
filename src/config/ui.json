@@ -1,5 +1,5 @@
 {
   "version": "1.0",
   "skin": "neon",
-  "reorder_long_press_sec": 1.0
+  "reorder_long_press_sec": 0.1
 }

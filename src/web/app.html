@@ -166,6 +166,48 @@
       flex: 1;
       min-height: 0;
     }
+    .card__icon-wrap {
+      position: relative;
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      align-self: flex-start;
+    }
+    .card__icon-wrap > .card__icon {
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+    }
+    .card__folder-btn {
+      position: absolute;
+      right: 3px;
+      bottom: 3px;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      margin: 0;
+      flex: none;
+      border: 1px solid rgba(71, 85, 105, 0.95);
+      border-radius: 6px;
+      background: rgba(7, 13, 26, 0.92);
+      color: var(--cyan-dim);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 3;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    }
+    .card__folder-btn:hover {
+      color: var(--cyan);
+      border-color: var(--card-primary-border);
+      background: rgba(15, 28, 51, 0.98);
+    }
+    .card__folder-svg {
+      width: 13px;
+      height: 13px;
+      display: block;
+    }
     .card__icon {
       flex-shrink: 0;
       width: 52px;
@@ -1010,8 +1052,8 @@
         </div>
         <div class="form-field" style="margin-top: 0.75rem">
           <label for="reorderLongPressSec">长按排序触发时间（秒）</label>
-          <input id="reorderLongPressSec" type="number" min="1" max="8" step="0.5" value="3" />
-          <p class="sub" style="margin-top: 0.55rem; margin-bottom: 0">排序：在应用卡片上长按至边框振动即可拖动；拖到另一张卡片上时该卡外框高亮表示将与它互换位置；拖到「+ 添加应用」为移到末尾。</p>
+          <input id="reorderLongPressSec" type="number" max="8" step="any" value="3" />
+          <p class="sub" style="margin-top: 0.55rem; margin-bottom: 0">排序：在应用卡片上长按至边框振动即可拖动；拖到另一张卡片上时该卡外框高亮表示将与它互换位置；拖到「+ 添加应用」为移到末尾。触发时间：须大于 0 秒（可填小数，如 0.3），最大 8 秒。</p>
         </div>
         <p id="settingsErr" class="form-err" aria-live="polite"></p>
         <div class="form-modal__foot">
@@ -1187,30 +1229,52 @@
         return b.length > 46 ? b.slice(0, 44) + "\u2026" : b;
       }
 
+      function cardFolderBtn(appId) {
+        return (
+          '<button type="button" class="card__folder-btn" data-app-id="' +
+          esc(appId) +
+          '" title="打开所在文件夹" aria-label="打开所在文件夹">' +
+          '<svg class="card__folder-svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>' +
+          "</button>"
+        );
+      }
+
       function cardIconBlock(app) {
         var iconUrl = String(app.icon_display_url || "").trim();
         var ch = String(app.name || "?").charAt(0);
         var letter = esc(ch);
         var urlSvg =
           '<svg class="card__icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.65"/><path d="M3 12h18M12 3c4 4 4 14 0 18M12 3c-4 4-4 14 0 18" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"/></svg>';
+        var folder = app.kind !== "url" ? cardFolderBtn(app.id) : "";
         if (iconUrl) {
           return (
+            '<div class="card__icon-wrap">' +
             '<div class="card__icon" aria-hidden="true">' +
             '<img class="card__icon-img" src="' +
             escAttr(iconUrl) +
             '" alt="" loading="lazy" onerror="this.classList.add(\'is-bad\');var n=this.nextElementSibling;if(n)n.classList.remove(\'is-hide\');" />' +
             '<div class="card__icon-fallback is-hide"><span class="card__icon-letter">' +
             letter +
-            "</span></div></div>"
+            "</span></div></div>" +
+            folder +
+            "</div>"
           );
         }
         if (app.kind === "url") {
-          return '<div class="card__icon card__icon--url" aria-hidden="true">' + urlSvg + "</div>";
+          return (
+            '<div class="card__icon-wrap">' +
+            '<div class="card__icon card__icon--url" aria-hidden="true">' +
+            urlSvg +
+            "</div></div>"
+          );
         }
         return (
+          '<div class="card__icon-wrap">' +
           '<div class="card__icon card__icon--app" aria-hidden="true"><span class="card__icon-letter">' +
           letter +
-          "</span></div>"
+          "</span></div>" +
+          folder +
+          "</div>"
         );
       }
 
@@ -1237,7 +1301,7 @@
         settingsErr.textContent = "";
         pendingSkin = (state && state.skin) || "neon";
         var rps = state && state.reorder_long_press_sec != null ? Number(state.reorder_long_press_sec) : 3;
-        var rpv = isFinite(rps) ? Math.max(1, Math.min(8, rps)) : 3;
+        var rpv = isFinite(rps) && rps > 0 ? Math.min(8, rps) : 3;
         document.getElementById("reorderLongPressSec").value = String(rpv);
         settingsModal.hidden = false;
         updateBodyScrollLock();
@@ -1348,13 +1412,14 @@
             if (ev.pointerType === "mouse" && ev.button !== 0) return;
             const t = ev.target;
             if (t.closest(".actions")) return;
+            if (t.closest(".card__folder-btn")) return;
             const card = t.closest(".card");
             if (!card || card.classList.contains("card--add-new")) return;
             const appId = card.getAttribute("data-app-id");
             if (!appId) return;
             const sec = Number(state && state.reorder_long_press_sec);
-            const ms = Math.round((isFinite(sec) ? sec : 3) * 1000);
-            const longPressMs = Math.max(1000, Math.min(8000, ms));
+            const ms = Math.round((isFinite(sec) && sec > 0 ? sec : 3) * 1000);
+            const longPressMs = Math.max(1, Math.min(8000, ms));
             dragSession = {
               pointerId: ev.pointerId,
               card: card,
@@ -1580,6 +1645,16 @@
             return;
           }
           const t = ev.target;
+          const folderBtn = t.closest(".card__folder-btn");
+          if (folderBtn) {
+            ev.stopPropagation();
+            const fid = folderBtn.getAttribute("data-app-id");
+            if (fid) {
+              const s = await api("open_app_folder", fid);
+              if (s) render(s);
+            }
+            return;
+          }
           if (t.closest(".actions")) {
             const lid = t.getAttribute("data-launch");
             const cid = t.getAttribute("data-close");
@@ -1609,6 +1684,7 @@
         });
         gridEl.addEventListener("dblclick", async function (ev) {
           if (ev.target.closest(".actions")) return;
+          if (ev.target.closest(".card__folder-btn")) return;
           const card = ev.target.closest(".card");
           if (!card) return;
           if (card.classList.contains("card--add-new")) {
@@ -1739,8 +1815,15 @@
         document.getElementById("settingsSave").addEventListener("click", async function () {
           settingsErr.textContent = "";
           var raw = parseFloat(document.getElementById("reorderLongPressSec").value);
-          var rps = isFinite(raw) ? raw : 3;
-          rps = Math.max(1, Math.min(8, rps));
+          var rps = isFinite(raw) ? raw : NaN;
+          if (!isFinite(rps) || rps <= 0) {
+            settingsErr.textContent = "须大于 0 秒，可填小数（例如 0.25、0.8）。";
+            return;
+          }
+          if (rps > 8) {
+            settingsErr.textContent = "不能超过 8 秒。";
+            return;
+          }
           const s = await api("save_ui_settings", { skin: pendingSkin, reorder_long_press_sec: rps });
           if (!s) return;
           if (s.ui_error) {
