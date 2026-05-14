@@ -1,5 +1,7 @@
+import os
 import threading
 import tkinter as tk
+from pathlib import Path
 from tkinter import filedialog
 from typing import Any, Callable, Dict, List, Optional, Set
 
@@ -7,6 +9,31 @@ from models.app_item import AppItem
 from services.config_service import ConfigService
 from services.launcher_service import LauncherService
 from services.ui_settings_service import UiSettingsService
+
+# 拖到「+ 添加应用」卡上：插入到全局列表末尾（紧贴添加入口之前）
+REORDER_BEFORE_ADD = "__add_new__"
+
+
+_IMG_ICON_EXT = frozenset({".png", ".jpg", ".jpeg", ".webp", ".ico", ".gif"})
+
+
+def _resolve_icon_display_url(app: AppItem) -> str:
+    raw = (app.icon or "").strip()
+    if not raw or not os.path.isfile(raw):
+        return ""
+    ext = os.path.splitext(raw)[1].lower()
+    if ext not in _IMG_ICON_EXT:
+        return ""
+    try:
+        return Path(os.path.normpath(raw)).resolve().as_uri()
+    except OSError:
+        return ""
+
+
+def _app_dict_for_ui(app: AppItem) -> Dict[str, Any]:
+    d = app.to_dict()
+    d["icon_display_url"] = _resolve_icon_display_url(app)
+    return d
 
 
 def _norm_search(q: str) -> str:
@@ -104,7 +131,8 @@ class LauncherApi:
         return list(self.displayed_apps)
 
     def get_state(self) -> Dict[str, Any]:
-        slots = [{"index": i, "app": app.to_dict()} for i, app in enumerate(self._slots())]
+        slots = [{"index": i, "app": _app_dict_for_ui(app)} for i, app in enumerate(self._slots())]
+        ui = self.ui_settings.load()
         return {
             "slots": slots,
             "selected_id": self.selected_app_id,
@@ -113,7 +141,8 @@ class LauncherApi:
             "status_text": self.status_text,
             "status_kind": self.status_kind,
             "search": self._search_raw,
-            "skin": self.ui_settings.load()["skin"],
+            "skin": ui["skin"],
+            "reorder_long_press_sec": ui["reorder_long_press_sec"],
             "total_count": len(self.displayed_apps),
         }
 
@@ -190,7 +219,7 @@ class LauncherApi:
             if ok:
                 threading.Timer(0.9, lambda: self._set_status("状态：就绪", "ok")).start()
             else:
-                self._set_status("状态：打开链接失败", "err")
+                self._set_status("状态：打开链接失败（请检查网址或所选浏览器是否已安装）", "err")
                 threading.Timer(1.5, lambda: self._set_status("状态：就绪", "ok")).start()
             return self.get_state()
 
@@ -304,6 +333,15 @@ class LauncherApi:
         kind = str(data.get("kind") or "app").strip().lower()
         if kind not in ("app", "url"):
             kind = "app"
+        url_browser = str(data.get("url_browser") or "default").strip().lower()
+        if url_browser not in ("default", "edge", "chrome", "qq"):
+            url_browser = "default"
+        if kind == "url":
+            if url_browser != "default" and not LauncherService.resolve_browser_exe(url_browser):
+                labels = {"edge": "Microsoft Edge", "chrome": "Google Chrome", "qq": "QQ 浏览器"}
+                return err(f"未在系统中找到 {labels[url_browser]}，请安装该浏览器或改用「系统默认」。")
+        else:
+            url_browser = ""
         app_id = data.get("id")
         if app_id is not None:
             app_id = str(app_id).strip() or None
@@ -337,8 +375,9 @@ class LauncherApi:
                 path=path,
                 working_dir=wd,
                 icon=icon if icon else (old.icon or ""),
-                description=description if description else (old.description or ""),
+                description=description,
                 kind=kind,
+                url_browser=url_browser,
             )
             if not self.config_service.update_app(old.id, item):
                 return err("保存失败")
@@ -350,6 +389,7 @@ class LauncherApi:
                 icon=icon,
                 description=description,
                 kind=kind,
+                url_browser=url_browser if kind == "url" else "",
             )
             if not self.config_service.add_app(item):
                 return err("保存失败")
@@ -364,3 +404,39 @@ class LauncherApi:
 
     def move_down(self) -> Dict[str, Any]:
         return self._do_move_down()
+
+    def reorder_app(self, payload: Any) -> Dict[str, Any]:
+        """全局顺序：拖到另一应用上则与该项互换位置；拖到 + 添加应用则移到列表末尾。"""
+        if not isinstance(payload, dict):
+            payload = {}
+        from_id = str(payload.get("from_id") or "").strip()
+        before_id = str(payload.get("before_id") or "").strip()
+        if not from_id:
+            return self.get_state()
+
+        apps = self.config_service.load_config()
+        from_idx = next((i for i, a in enumerate(apps) if a.id == from_id), None)
+        if from_idx is None:
+            return self.get_state()
+
+        if before_id == REORDER_BEFORE_ADD:
+            insert_idx = len(apps)
+            item = apps.pop(from_idx)
+            if insert_idx > from_idx:
+                insert_idx -= 1
+            apps.insert(insert_idx, item)
+        else:
+            if not before_id or before_id == from_id:
+                return self.load()
+            to_idx = next((i for i, a in enumerate(apps) if a.id == before_id), None)
+            if to_idx is None:
+                return self.get_state()
+            if to_idx == from_idx:
+                return self.load()
+            apps[from_idx], apps[to_idx] = apps[to_idx], apps[from_idx]
+
+        self.config_service.save_config(apps)
+        self.load()
+        self.selected_app_id = from_id
+        self._apply_filter()
+        return self.get_state()

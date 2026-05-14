@@ -5,15 +5,18 @@ from typing import Any, Dict, Optional
 
 ALLOWED_SKINS = ("neon", "ember", "aurora", "shadow")
 DEFAULT_SKIN = "neon"
+DEFAULT_REORDER_LONG_PRESS_SEC = 3.0
+MIN_REORDER_LONG_PRESS_SEC = 1.0
+MAX_REORDER_LONG_PRESS_SEC = 8.0
 
 
 class UiSettingsService:
-    """Web 壳外观设置（皮肤等），存于 config/ui.json。"""
+    """Web 壳外观与交互设置，存于 config/ui.json。"""
 
     def __init__(self) -> None:
         self._path = self._get_path()
         self._ensure_dir()
-        self._skin_cache: Optional[str] = None
+        self._cache: Optional[Dict[str, Any]] = None
 
     def _get_path(self) -> str:
         if getattr(sys, "frozen", False):
@@ -27,32 +30,63 @@ class UiSettingsService:
         if not os.path.exists(d):
             os.makedirs(d)
 
-    def load(self) -> Dict[str, Any]:
-        if self._skin_cache is not None:
-            return {"skin": self._skin_cache}
+    @staticmethod
+    def _normalize_reorder_sec(value: Any) -> float:
+        try:
+            x = float(value)
+        except (TypeError, ValueError):
+            x = DEFAULT_REORDER_LONG_PRESS_SEC
+        return max(MIN_REORDER_LONG_PRESS_SEC, min(MAX_REORDER_LONG_PRESS_SEC, x))
+
+    def _read_disk(self) -> Dict[str, Any]:
         if not os.path.exists(self._path):
-            self._skin_cache = DEFAULT_SKIN
-            return {"skin": self._skin_cache}
+            return {
+                "skin": DEFAULT_SKIN,
+                "reorder_long_press_sec": DEFAULT_REORDER_LONG_PRESS_SEC,
+            }
         try:
             with open(self._path, "r", encoding="utf-8") as f:
                 data = json.load(f)
             skin = str(data.get("skin", DEFAULT_SKIN)).strip()
             if skin not in ALLOWED_SKINS:
                 skin = DEFAULT_SKIN
-            self._skin_cache = skin
-            return {"skin": skin}
+            r = self._normalize_reorder_sec(
+                data.get("reorder_long_press_sec", DEFAULT_REORDER_LONG_PRESS_SEC)
+            )
+            return {"skin": skin, "reorder_long_press_sec": r}
         except Exception:
-            self._skin_cache = DEFAULT_SKIN
-            return {"skin": self._skin_cache}
+            return {
+                "skin": DEFAULT_SKIN,
+                "reorder_long_press_sec": DEFAULT_REORDER_LONG_PRESS_SEC,
+            }
+
+    def load(self) -> Dict[str, Any]:
+        if self._cache is not None:
+            return dict(self._cache)
+        self._cache = self._read_disk()
+        return dict(self._cache)
 
     def save(self, data: Dict[str, Any]) -> bool:
-        skin = str(data.get("skin", DEFAULT_SKIN)).strip()
+        cur = self._read_disk()
+        skin = str(data.get("skin", cur["skin"])).strip()
         if skin not in ALLOWED_SKINS:
             skin = DEFAULT_SKIN
+        r = self._normalize_reorder_sec(
+            data.get("reorder_long_press_sec", cur["reorder_long_press_sec"])
+        )
         try:
             with open(self._path, "w", encoding="utf-8") as f:
-                json.dump({"version": "1.0", "skin": skin}, f, indent=2, ensure_ascii=False)
-            self._skin_cache = skin
+                json.dump(
+                    {
+                        "version": "1.0",
+                        "skin": skin,
+                        "reorder_long_press_sec": r,
+                    },
+                    f,
+                    indent=2,
+                    ensure_ascii=False,
+                )
+            self._cache = {"skin": skin, "reorder_long_press_sec": r}
             return True
         except Exception as e:
             print(f"保存 ui.json 失败: {e}")

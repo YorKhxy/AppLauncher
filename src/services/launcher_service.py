@@ -20,8 +20,26 @@ class LauncherService:
             url = self.normalize_url(app_item.path)
             if not self.validate_url(url):
                 return False
+            browser = (app_item.url_browser or "default").strip().lower()
+            if browser not in ("default", "edge", "chrome", "qq"):
+                browser = "default"
             try:
-                webbrowser.open(url, new=2)
+                if browser == "default":
+                    webbrowser.open(url, new=2)
+                    return True
+                exe = self.resolve_browser_exe(browser)
+                if not exe:
+                    print(f"未找到浏览器可执行文件: {browser}")
+                    return False
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                startupinfo.wShowWindow = 1
+                subprocess.Popen(
+                    [exe, url],
+                    cwd=os.path.dirname(exe) or None,
+                    shell=False,
+                    startupinfo=startupinfo,
+                )
                 return True
             except Exception as e:
                 print(f"打开链接失败: {e}")
@@ -297,6 +315,48 @@ class LauncherService:
     def validate_url(url: str) -> bool:
         u = urlparse((url or "").strip())
         return u.scheme in ("http", "https") and bool(u.netloc)
+
+    @staticmethod
+    def resolve_browser_exe(browser_key: str) -> Optional[str]:
+        key = (browser_key or "").strip().lower()
+        if key not in ("edge", "chrome", "qq"):
+            return None
+        env = os.environ
+        pf = env.get("ProgramFiles", "")
+        pfx86 = env.get("ProgramFiles(x86)", "")
+        pf64 = env.get("ProgramW6432", "")
+        local = env.get("LOCALAPPDATA", "")
+        candidates: List[str] = []
+
+        if key == "edge":
+            for root in (pfx86, pf, pf64, local):
+                if root:
+                    candidates.append(
+                        os.path.join(root, "Microsoft", "Edge", "Application", "msedge.exe")
+                    )
+        elif key == "chrome":
+            for root in (pf64, pf, pfx86):
+                if root:
+                    candidates.append(
+                        os.path.join(root, "Google", "Chrome", "Application", "chrome.exe")
+                    )
+        else:
+            for root in (pfx86, pf):
+                if root:
+                    candidates.append(os.path.join(root, "Tencent", "QQBrowser", "QQBrowser.exe"))
+            if local:
+                candidates.append(
+                    os.path.join(local, "Tencent", "QQBrowser", "Application", "QQBrowser.exe")
+                )
+
+        seen: Set[str] = set()
+        for c in candidates:
+            if not c or c in seen:
+                continue
+            seen.add(c)
+            if os.path.isfile(c):
+                return c
+        return None
 
     @staticmethod
     def get_file_type(path: str) -> str:

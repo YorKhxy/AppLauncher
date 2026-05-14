@@ -2,13 +2,14 @@
   "version": "1.0",
   "apps": [
     {
-      "id": "3ad8f881-a1cb-4080-9f42-5331044fff1f",
-      "name": "绝境突围",
-      "path": "G:/gamestart-v1.34/gamestart/CS_Server/绝境突围.bat",
+      "id": "90467408-f924-4855-a352-54e39cab0e4d",
+      "name": "总控",
+      "path": "http://172.0.0.218:36002/",
       "working_dir": "",
       "icon": "",
       "description": "",
-      "kind": "app"
+      "kind": "url",
+      "url_browser": "edge"
     },
     {
       "id": "10d38599-a960-4f8c-9b0a-d4dfa984ed4f",
@@ -17,7 +18,18 @@
       "working_dir": "",
       "icon": "",
       "description": "",
-      "kind": "app"
+      "kind": "app",
+      "url_browser": ""
+    },
+    {
+      "id": "3c09aef3-596a-43d0-a2f0-ed84e4e8d939",
+      "name": "内网218",
+      "path": "http://172.0.0.218:36003/",
+      "working_dir": "",
+      "icon": "",
+      "description": "",
+      "kind": "url",
+      "url_browser": "chrome"
     }
   ]
 }
