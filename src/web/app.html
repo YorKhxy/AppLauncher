@@ -179,14 +179,11 @@
       box-sizing: border-box;
     }
     .card__folder-btn {
-      position: absolute;
-      right: 3px;
-      bottom: 3px;
-      width: 22px;
-      height: 22px;
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
       padding: 0;
       margin: 0;
-      flex: none;
       border: 1px solid rgba(71, 85, 105, 0.95);
       border-radius: 6px;
       background: rgba(7, 13, 26, 0.92);
@@ -266,12 +263,26 @@
     }
     .card__body h3 {
       margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
       font-family: Orbitron, sans-serif;
       font-size: 0.72rem;
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
       line-height: 1.25;
+      overflow: hidden;
+    }
+    .card__body h3 > * {
+      flex-shrink: 0;
+    }
+    .card__title {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .card__path {
       margin: 0.1rem 0 0;
@@ -1245,7 +1256,6 @@
         var letter = esc(ch);
         var urlSvg =
           '<svg class="card__icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.65"/><path d="M3 12h18M12 3c4 4 4 14 0 18M12 3c-4 4-4 14 0 18" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"/></svg>';
-        var folder = app.kind !== "url" ? cardFolderBtn(app.id) : "";
         if (iconUrl) {
           return (
             '<div class="card__icon-wrap">' +
@@ -1255,9 +1265,7 @@
             '" alt="" loading="lazy" onerror="this.classList.add(\'is-bad\');var n=this.nextElementSibling;if(n)n.classList.remove(\'is-hide\');" />' +
             '<div class="card__icon-fallback is-hide"><span class="card__icon-letter">' +
             letter +
-            "</span></div></div>" +
-            folder +
-            "</div>"
+            "</span></div></div></div>"
           );
         }
         if (app.kind === "url") {
@@ -1272,9 +1280,7 @@
           '<div class="card__icon-wrap">' +
           '<div class="card__icon card__icon--app" aria-hidden="true"><span class="card__icon-letter">' +
           letter +
-          "</span></div>" +
-          folder +
-          "</div>"
+          "</span></div></div>"
         );
       }
 
@@ -1554,7 +1560,7 @@
             '<div class="card__row">' +
             iconBlock +
             '<div class="card__body">' +
-            "<h3>" + title + "</h3>" +
+            "<h3><span class=\"card__title\">" + title + "</span>" + (app.kind !== "url" ? cardFolderBtn(app.id) : "") + "</h3>" +
             meta +
             subHtml +
             "</div></div>";
