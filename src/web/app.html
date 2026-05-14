@@ -940,6 +940,257 @@
       color: var(--rose);
       min-height: 1.2em;
     }
+
+    .main-tabs {
+      display: flex;
+      gap: 0.35rem;
+      padding: 0.35rem;
+      margin-bottom: 0.85rem;
+      background: rgba(3, 7, 18, 0.55);
+      border-radius: 14px;
+      border: 1px solid rgba(71, 85, 105, 0.45);
+    }
+    .main-tab {
+      flex: 1;
+      font-family: Orbitron, sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.55rem 0.75rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: transparent;
+      color: var(--muted);
+      transition: color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+    .main-tab:hover {
+      color: var(--text);
+    }
+    .main-tab.is-active {
+      color: var(--cyan);
+      background: rgba(34, 211, 238, 0.1);
+      box-shadow: inset 0 0 0 1px var(--card-primary-border);
+    }
+    .view-panel[hidden] {
+      display: none !important;
+    }
+    .custom-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 0.85rem;
+    }
+    .custom-toolbar button {
+      font-family: Orbitron, sans-serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.4rem 0.65rem;
+      border-radius: 10px;
+      border: 1px solid rgba(71, 85, 105, 0.75);
+      background: rgba(11, 18, 36, 0.9);
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .custom-toolbar button:hover {
+      color: var(--cyan);
+      border-color: var(--card-primary-border);
+    }
+    .custom-empty {
+      margin: 0.5rem 0 1rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    #customGroupsRoot {
+      max-height: calc(100vh - 320px);
+      overflow-y: auto;
+      padding: 0 2px 6px;
+    }
+    .cg-group {
+      border: 1px solid rgba(71, 85, 105, 0.55);
+      border-radius: 16px;
+      background: rgba(5, 10, 22, 0.45);
+      margin-bottom: 0.65rem;
+      overflow: hidden;
+    }
+    .cg-group.is-active-group {
+      box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.22);
+    }
+    .cg-group__head {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 0.75rem;
+      background: rgba(17, 28, 51, 0.55);
+      border-bottom: 1px solid rgba(71, 85, 105, 0.35);
+      cursor: pointer;
+      user-select: none;
+    }
+    .cg-group__head:hover {
+      background: rgba(17, 28, 51, 0.72);
+    }
+    .cg-group__chev {
+      width: 1.1rem;
+      text-align: center;
+      color: var(--cyan-dim);
+      font-size: 0.72rem;
+      transition: transform 0.2s;
+    }
+    .cg-group.is-collapsed .cg-group__chev {
+      transform: rotate(-90deg);
+    }
+    .cg-group__title {
+      flex: 1;
+      font-family: Orbitron, sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .cg-group__meta {
+      font-size: 0.6rem;
+      color: var(--muted);
+    }
+    .cg-group__actions {
+      display: flex;
+      gap: 0.3rem;
+      flex-shrink: 0;
+    }
+    .cg-group__actions button {
+      font-size: 0.55rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.45rem;
+      border-radius: 6px;
+      border: 1px solid rgba(71, 85, 105, 0.55);
+      background: rgba(8, 14, 28, 0.85);
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .cg-group__actions button:hover {
+      color: var(--cyan);
+      border-color: var(--card-primary-border);
+    }
+    .cg-group__body {
+      padding: 0.65rem 0.65rem 0.75rem;
+    }
+    .cg-group.is-collapsed .cg-group__body {
+      display: none;
+    }
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.55rem;
+    }
+    .mini-grid .card {
+      min-height: 118px;
+      padding: 0.55rem 0.55rem 0.5rem;
+    }
+    .mini-grid .card__icon-wrap {
+      width: 42px;
+      height: 42px;
+    }
+    .mini-grid .card__icon-letter {
+      font-size: 0.92rem;
+    }
+    .mini-grid .card__icon-svg {
+      width: 22px;
+      height: 22px;
+    }
+    .mini-grid .card__body h3 {
+      font-size: 0.65rem;
+    }
+    .mini-grid .card button {
+      font-size: 0.62rem;
+      padding: 0.28rem 0.2rem;
+    }
+    .card--add-to-group {
+      border-style: dashed;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 118px;
+      cursor: pointer;
+    }
+    .card--add-to-group h3 {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+    .card--add-to-group:hover h3 {
+      color: var(--cyan);
+    }
+    .dock .dock-row-label {
+      flex: 0 0 100%;
+      width: 100%;
+      text-align: center;
+      font-family: Orbitron, sans-serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.1rem;
+    }
+    .dock button[disabled] {
+      opacity: 0.38;
+      cursor: not-allowed;
+    }
+    .picker-list {
+      max-height: min(52vh, 420px);
+      overflow: auto;
+    }
+    .picker-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.55rem;
+      padding: 0.5rem 0.55rem;
+      border-radius: 10px;
+      border: 1px solid rgba(71, 85, 105, 0.45);
+      margin-bottom: 0.4rem;
+      background: rgba(5, 10, 22, 0.55);
+      cursor: pointer;
+    }
+    .picker-row:hover {
+      border-color: var(--card-primary-border);
+    }
+    .picker-row.is-disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+    .picker-row input {
+      margin-top: 0.15rem;
+      accent-color: var(--cyan);
+    }
+    .picker-row__main {
+      flex: 1;
+      min-width: 0;
+    }
+    .picker-row__title {
+      font-family: Orbitron, sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin: 0 0 0.12rem;
+    }
+    .picker-row__path {
+      margin: 0;
+      font-size: 0.62rem;
+      color: var(--muted);
+      word-break: break-all;
+      line-height: 1.3;
+    }
+    .picker-kind {
+      font-size: 0.52rem;
+      color: var(--violet);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: Orbitron, sans-serif;
+      align-self: center;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -951,18 +1202,31 @@
         <h1>VR Launcher</h1>
         <span id="statusLine" class="status status--ok">状态：就绪</span>
       </div>
-      <div class="search">
-        <span aria-hidden="true">⌕</span>
-        <input id="searchInput" type="text" placeholder="筛选应用..." autocomplete="off" />
+      <div class="main-tabs" role="tablist" aria-label="主视图">
+        <button type="button" class="main-tab is-active" id="tabAll" role="tab" aria-selected="true">全部</button>
+        <button type="button" class="main-tab" id="tabCustom" role="tab" aria-selected="false">自定义</button>
       </div>
-
-      <div id="cardGrid" class="card-grid"></div>
-      <div id="noBridge" class="no-bridge" hidden>
-        未检测到 pywebview API（若用浏览器直接打开本文件会出现此提示）。请从 <code>python main.py</code> 启动。
+      <div id="viewAll" class="view-panel">
+        <div class="search">
+          <span aria-hidden="true">⌕</span>
+          <input id="searchInput" type="text" placeholder="筛选应用..." autocomplete="off" />
+        </div>
+        <div id="cardGrid" class="card-grid"></div>
+        <div id="noBridge" class="no-bridge" hidden>
+          未检测到 pywebview API（若用浏览器直接打开本文件会出现此提示）。请从 <code>python main.py</code> 启动。
+        </div>
+      </div>
+      <div id="viewCustom" class="view-panel" hidden>
+        <div class="custom-toolbar">
+          <button type="button" id="btnNewCustomGroup">+ 新建自定义组</button>
+          <button type="button" id="btnExpandAllGroups">全部展开</button>
+          <button type="button" id="btnCollapseAllGroups">全部折叠</button>
+        </div>
+        <div id="customGroupsRoot"></div>
       </div>
     </div>
   </div>
-  <nav class="dock" aria-label="底栏">
+  <nav id="dockAll" class="dock" aria-label="底栏 · 全部" style="display: flex">
     <button type="button" class="accent" data-act="add">＋ 添加应用</button>
     <button type="button" data-act="edit">编辑</button>
     <button type="button" data-act="del">删除</button>
@@ -971,6 +1235,16 @@
     <span class="sep">排序</span>
     <button type="button" data-act="up">上移</button>
     <button type="button" data-act="down">下移</button>
+  </nav>
+  <nav id="dockCustom" class="dock" aria-label="底栏 · 自定义" hidden style="display: none">
+    <span class="dock-row-label" id="dockCustomLabel">自定义组</span>
+    <button type="button" class="accent" data-act-custom="add-to-group">添加到组</button>
+    <button type="button" data-act-custom="remove-from-group" id="dockBtnRemoveFromGroup">移出组</button>
+    <button type="button" data-act-custom="edit">编辑</button>
+    <button type="button" data-act-custom="refresh">刷新</button>
+    <span class="sep">排序</span>
+    <button type="button" data-act-custom="up">上移</button>
+    <button type="button" data-act-custom="down">下移</button>
   </nav>
 
   <div id="appFormModal" class="form-modal" hidden>
@@ -1110,6 +1384,25 @@
     </div>
   </div>
 
+  <div id="groupPickerModal" class="form-modal" hidden>
+    <div class="form-modal__backdrop" data-picker-close tabindex="-1"></div>
+    <div class="form-modal__panel" role="dialog" aria-modal="true" aria-labelledby="groupPickerTitle">
+      <div class="form-modal__cap">
+        <h2 id="groupPickerTitle">从「全部」添加</h2>
+        <button type="button" data-picker-close aria-label="关闭">✕</button>
+      </div>
+      <div class="form-modal__body">
+        <p class="sub" id="groupPickerSub"></p>
+        <div id="groupPickerList" class="picker-list"></div>
+        <p id="groupPickerErr" class="form-err" aria-live="polite"></p>
+        <div class="form-modal__foot">
+          <button type="button" data-picker-close>取消</button>
+          <button type="button" class="primary" id="groupPickerOk">加入组</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     (function () {
       const RAINBOW_NAMES = ["赤", "橙", "黄", "绿", "青", "蓝", "靛", "紫"];
@@ -1139,6 +1432,15 @@
       const settingsModal = document.getElementById("settingsModal");
       const settingsErr = document.getElementById("settingsErr");
       const skinPickGrid = document.getElementById("skinPickGrid");
+      const viewAll = document.getElementById("viewAll");
+      const viewCustom = document.getElementById("viewCustom");
+      const tabAll = document.getElementById("tabAll");
+      const tabCustom = document.getElementById("tabCustom");
+      const customGroupsRoot = document.getElementById("customGroupsRoot");
+      const dockAll = document.getElementById("dockAll");
+      const dockCustom = document.getElementById("dockCustom");
+      const groupPickerModal = document.getElementById("groupPickerModal");
+      let pickerTargetGroupId = null;
       let state = null;
       let searchDebounce = null;
       let started = false;
@@ -1294,7 +1596,13 @@
 
       function updateBodyScrollLock() {
         document.body.style.overflow =
-          !appFormModal.hidden || !settingsModal.hidden || !confirmModal.hidden || !alertModal.hidden ? "hidden" : "";
+          !appFormModal.hidden ||
+          !settingsModal.hidden ||
+          !confirmModal.hidden ||
+          !alertModal.hidden ||
+          !groupPickerModal.hidden
+            ? "hidden"
+            : "";
       }
 
       function syncSkinCards() {
@@ -1333,7 +1641,62 @@
         updateBodyScrollLock();
       }
 
+      function closeGroupPickerModal() {
+        groupPickerModal.hidden = true;
+        pickerTargetGroupId = null;
+        const lst = document.getElementById("groupPickerList");
+        if (lst) lst.innerHTML = "";
+        const err = document.getElementById("groupPickerErr");
+        if (err) err.textContent = "";
+        updateBodyScrollLock();
+      }
+
+      function openGroupPickerModal(targetGid) {
+        if (!state) return;
+        pickerTargetGroupId = targetGid;
+        const g = (state.custom_groups || []).find(function (x) {
+          return x.id === targetGid;
+        });
+        const gname = g ? g.name : "";
+        document.getElementById("groupPickerSub").textContent =
+          "目标组：「" +
+          (gname || "") +
+          "」。勾选「全部」中已有的应用或链接加入该组（已在当前组中的项不可选）。";
+        document.getElementById("groupPickerErr").textContent = "";
+        const inSet = new Set((g && g.item_ids) || []);
+        const listEl = document.getElementById("groupPickerList");
+        let h = "";
+        const cat = state.catalog_slots || [];
+        for (let i = 0; i < cat.length; i++) {
+          const slot = cat[i];
+          const app = slot.app;
+          if (!app) continue;
+          const dis = inSet.has(app.id);
+          const kind = app.kind === "url" ? "URL" : "应用";
+          h +=
+            '<label class="picker-row' + (dis ? " is-disabled" : "") + '">' +
+            '<input type="checkbox" data-pick-id="' +
+            escAttr(app.id) +
+            '" ' +
+            (dis ? "disabled " : "") +
+            "/>" +
+            '<div class="picker-row__main">' +
+            '<p class="picker-row__title">' +
+            esc(app.name) +
+            "</p>" +
+            '<p class="picker-row__path">' +
+            esc(app.path || "") +
+            "</p></div>" +
+            '<span class="picker-kind">' +
+            kind +
+            "</span></label>";
+        }
+        listEl.innerHTML = h;
+        groupPickerModal.hidden = false;
+        updateBodyScrollLock();
+      }
       let dragSession = null;
+      let customDragSession = null;
       var blockGridClickUntil = 0;
 
       function dragModalsOpen() {
@@ -1341,7 +1704,8 @@
           !appFormModal.hidden ||
           !settingsModal.hidden ||
           !confirmModal.hidden ||
-          !alertModal.hidden
+          !alertModal.hidden ||
+          !groupPickerModal.hidden
         );
       }
 
@@ -1413,7 +1777,9 @@
           "pointerdown",
           function (ev) {
             if (!started || !state) return;
+            if ((state.main_tab || "all") !== "all") return;
             if (dragSession) return;
+            if (customDragSession) return;
             if (dragModalsOpen()) return;
             if (ev.pointerType === "mouse" && ev.button !== 0) return;
             const t = ev.target;
@@ -1521,15 +1887,240 @@
         });
       }
 
-      function render(s) {
-        if (!s) return;
-        cancelReorderDrag();
-        state = s;
-        statusEl.textContent = s.status_text || "";
-        statusEl.className = "status status--" + (s.status_kind || "ok");
-        if (document.activeElement !== searchEl) {
-          searchEl.value = s.search || "";
+      function cancelCustomReorderDrag() {
+        if (!customDragSession) return;
+        if (customDragSession.timer) {
+          clearTimeout(customDragSession.timer);
+          customDragSession.timer = null;
         }
+        if (customDragSession.ghostEl) customDragSession.ghostEl.remove();
+        if (customDragSession.card) {
+          customDragSession.card.classList.remove("card--drag-armed", "card--drag-source");
+          try {
+            customDragSession.card.releasePointerCapture(customDragSession.pointerId);
+          } catch (e3) {}
+        }
+        if (customGroupsRoot) {
+          customGroupsRoot.querySelectorAll(".card--drop-target").forEach(function (c) {
+            c.classList.remove("card--drop-target");
+          });
+        }
+        customDragSession = null;
+      }
+
+      function updateCustomReorderDropHover(clientX, clientY, fromId, sourceCard, groupId) {
+        const ghost = document.getElementById("reorderGhost");
+        if (ghost) ghost.style.visibility = "hidden";
+        const el = document.elementFromPoint(clientX, clientY);
+        if (ghost) ghost.style.visibility = "";
+        if (customGroupsRoot) {
+          customGroupsRoot.querySelectorAll(".card--drop-target").forEach(function (c) {
+            c.classList.remove("card--drop-target");
+          });
+        }
+        if (!el) return;
+        const card = el.closest && el.closest(".card");
+        if (!card || card === sourceCard) return;
+        const gsec = card.closest && card.closest(".cg-group");
+        if (!gsec || gsec.getAttribute("data-group-id") !== groupId) return;
+        if (card.classList.contains("card--add-to-group")) {
+          card.classList.add("card--drop-target");
+          return;
+        }
+        const bid = card.getAttribute("data-app-id");
+        if (bid && bid !== fromId) card.classList.add("card--drop-target");
+      }
+
+      function pickCustomReorderDropTarget(clientX, clientY, fromId, sourceCard, groupId) {
+        const ghost = document.getElementById("reorderGhost");
+        if (ghost) ghost.style.visibility = "hidden";
+        const el = document.elementFromPoint(clientX, clientY);
+        if (ghost) ghost.style.visibility = "";
+        if (!el) return null;
+        const card = el.closest && el.closest(".card");
+        if (!card || card === sourceCard) return null;
+        const gsec = card.closest && card.closest(".cg-group");
+        if (!gsec || gsec.getAttribute("data-group-id") !== groupId) return null;
+        if (card.classList.contains("card--add-to-group")) return REORDER_BEFORE_ADD;
+        const bid = card.getAttribute("data-app-id");
+        if (!bid || bid === fromId) return null;
+        return bid;
+      }
+
+      function bindCustomReorderPointer() {
+        if (!customGroupsRoot) return;
+        customGroupsRoot.addEventListener(
+          "pointerdown",
+          function (ev) {
+            if (!started || !state) return;
+            if ((state.main_tab || "all") !== "custom") return;
+            if (customDragSession || dragSession) return;
+            if (dragModalsOpen()) return;
+            if (ev.pointerType === "mouse" && ev.button !== 0) return;
+            const t = ev.target;
+            if (t.closest(".actions")) return;
+            if (t.closest(".card__folder-btn")) return;
+            if (t.closest(".cg-group__actions")) return;
+            const card = t.closest(".card");
+            if (!card || card.classList.contains("card--add-to-group")) return;
+            const appId = card.getAttribute("data-app-id");
+            const groupId = card.getAttribute("data-group-id");
+            if (!appId || !groupId) return;
+            const sec = Number(state && state.reorder_long_press_sec);
+            const ms = Math.round((isFinite(sec) && sec > 0 ? sec : 3) * 1000);
+            const longPressMs = Math.max(1, Math.min(8000, ms));
+            customDragSession = {
+              pointerId: ev.pointerId,
+              card: card,
+              appId: appId,
+              groupId: groupId,
+              startX: ev.clientX,
+              startY: ev.clientY,
+              lastX: ev.clientX,
+              lastY: ev.clientY,
+              armed: false,
+              armX: 0,
+              armY: 0,
+              ghostEl: null,
+              timer: null,
+              longPressMs: longPressMs,
+            };
+            customDragSession.timer = setTimeout(function () {
+              if (!customDragSession || customDragSession.armed) return;
+              customDragSession.timer = null;
+              customDragSession.armed = true;
+              customDragSession.armX = customDragSession.lastX;
+              customDragSession.armY = customDragSession.lastY;
+              customDragSession.card.classList.add("card--drag-armed", "card--drag-source");
+              const g = document.createElement("div");
+              g.id = "reorderGhost";
+              g.className = "reorder-ghost";
+              var h3c = customDragSession.card.querySelector("h3");
+              g.textContent = h3c ? h3c.textContent : "App";
+              document.body.appendChild(g);
+              customDragSession.ghostEl = g;
+              positionReorderGhost(customDragSession.lastX, customDragSession.lastY);
+              try {
+                customDragSession.card.setPointerCapture(customDragSession.pointerId);
+              } catch (err2) {}
+            }, longPressMs);
+          },
+          true
+        );
+
+        window.addEventListener("pointermove", function (ev) {
+          if (!customDragSession || ev.pointerId !== customDragSession.pointerId) return;
+          customDragSession.lastX = ev.clientX;
+          customDragSession.lastY = ev.clientY;
+          if (!customDragSession.armed) {
+            var dx2 = ev.clientX - customDragSession.startX;
+            var dy2 = ev.clientY - customDragSession.startY;
+            if (Math.hypot(dx2, dy2) > REORDER_MOVE_CANCEL_PX) {
+              if (customDragSession.timer) clearTimeout(customDragSession.timer);
+              customDragSession.timer = null;
+              customDragSession = null;
+            }
+            return;
+          }
+          positionReorderGhost(ev.clientX, ev.clientY);
+          updateCustomReorderDropHover(
+            ev.clientX,
+            ev.clientY,
+            customDragSession.appId,
+            customDragSession.card,
+            customDragSession.groupId
+          );
+        });
+
+        window.addEventListener("pointerup", function (ev) {
+          if (!customDragSession || ev.pointerId !== customDragSession.pointerId) return;
+          if (customDragSession.timer) {
+            clearTimeout(customDragSession.timer);
+            customDragSession.timer = null;
+          }
+          if (!customDragSession.armed) {
+            customDragSession = null;
+            return;
+          }
+          var moved2 =
+            Math.hypot(ev.clientX - customDragSession.armX, ev.clientY - customDragSession.armY) >=
+            REORDER_DRAG_COMMIT_PX;
+          var beforeId2 = pickCustomReorderDropTarget(
+            ev.clientX,
+            ev.clientY,
+            customDragSession.appId,
+            customDragSession.card,
+            customDragSession.groupId
+          );
+          var appId2 = customDragSession.appId;
+          var grp2 = customDragSession.groupId;
+          var src2 = customDragSession.card;
+          try {
+            src2.releasePointerCapture(ev.pointerId);
+          } catch (e4) {}
+          if (customDragSession.ghostEl) customDragSession.ghostEl.remove();
+          src2.classList.remove("card--drag-armed", "card--drag-source");
+          if (customGroupsRoot) {
+            customGroupsRoot.querySelectorAll(".card--drop-target").forEach(function (c) {
+              c.classList.remove("card--drop-target");
+            });
+          }
+          customDragSession = null;
+          blockGridClickUntil = Date.now() + 450;
+          if (!moved2 || !beforeId2) return;
+          api("custom_group_reorder", {
+            group_id: grp2,
+            from_id: appId2,
+            before_id: beforeId2,
+          }).then(function (s2) {
+            if (s2) render(s2);
+          });
+        });
+
+        window.addEventListener("pointercancel", function (ev) {
+          if (!customDragSession || ev.pointerId !== customDragSession.pointerId) return;
+          cancelCustomReorderDrag();
+        });
+      }
+
+      function syncTabDockUi() {
+        if (!state) return;
+        var tab = state.main_tab;
+        if (tab !== "custom" && tab !== "all") tab = "all";
+        var isAll = tab === "all";
+        tabAll.classList.toggle("is-active", isAll);
+        tabCustom.classList.toggle("is-active", !isAll);
+        tabAll.setAttribute("aria-selected", isAll ? "true" : "false");
+        tabCustom.setAttribute("aria-selected", !isAll ? "true" : "false");
+        viewAll.hidden = !isAll;
+        viewCustom.hidden = isAll;
+        /* pywebview 下 [hidden] 与 .dock{display:flex} 偶发叠层，强制用 display 切换 */
+        dockAll.style.display = isAll ? "" : "none";
+        dockCustom.style.display = isAll ? "none" : "";
+        dockAll.hidden = !isAll;
+        dockCustom.hidden = isAll;
+        const gid = state.active_custom_group_id;
+        const groups = state.custom_groups || [];
+        var gname = "未选择";
+        for (var ix = 0; ix < groups.length; ix++) {
+          if (groups[ix].id === gid) {
+            gname = groups[ix].name || gname;
+            break;
+          }
+        }
+        const lab = document.getElementById("dockCustomLabel");
+        if (lab) lab.textContent = "底部栏 · 自定义组 · " + gname;
+        const rm = document.getElementById("dockBtnRemoveFromGroup");
+        if (rm) rm.disabled = !state.custom_selected_app_id;
+        const upb = dockCustom.querySelector('[data-act-custom="up"]');
+        const dnb = dockCustom.querySelector('[data-act-custom="down"]');
+        if (upb) upb.disabled = !state.custom_selected_app_id;
+        if (dnb) dnb.disabled = !state.custom_selected_app_id;
+      }
+
+      function renderAllGrid() {
+        if (!state) return;
+        const s = state;
         const running = new Set(s.running_ids || []);
         const launching = new Set(s.launching_ids || []);
         const sel = s.selected_id;
@@ -1575,11 +2166,125 @@
             '<p>点击添加新应用</p>' +
           '</article>';
         gridEl.innerHTML = html;
+      }
+
+      function renderCustomGrid() {
+        if (!state || !customGroupsRoot) return;
+        const s = state;
+        const groups = s.custom_groups || [];
+        if (groups.length === 0) {
+          customGroupsRoot.innerHTML =
+            '<p class="custom-empty">暂无自定义组。点击上方「新建自定义组」添加。</p>';
+          return;
+        }
+        const running = new Set(s.running_ids || []);
+        const launching = new Set(s.launching_ids || []);
+        const selG = s.custom_selected_group_id;
+        const selA = s.custom_selected_app_id;
+        let html = "";
+        for (let gi = 0; gi < groups.length; gi++) {
+          const g = groups[gi];
+          const collapsed = !!g.collapsed;
+          const activeG = s.active_custom_group_id === g.id;
+          const cls = ["cg-group"];
+          if (collapsed) cls.push("is-collapsed");
+          if (activeG) cls.push("is-active-group");
+          const nslots = (g.slots || []).length;
+          html += '<section class="' + cls.join(" ") + '" data-group-id="' + escAttr(g.id) + '">';
+          html += '<div class="cg-group__head" data-group-toggle="' + escAttr(g.id) + '" role="button" tabindex="0">';
+          html += '<span class="cg-group__chev" aria-hidden="true">▼</span>';
+          html += '<span class="cg-group__title">' + esc(g.name || "未命名组") + "</span>";
+          html += '<span class="cg-group__meta">' + String(nslots) + " 项</span>";
+          html += '<div class="cg-group__actions" onclick="event.stopPropagation()">';
+          html += '<button type="button" data-group-rename="' + escAttr(g.id) + '">编辑组名</button>';
+          html += '<button type="button" data-group-delete="' + escAttr(g.id) + '">删除组</button>';
+          html += "</div></div>";
+          html += '<div class="cg-group__body"><div class="mini-grid">';
+          for (const slot of g.slots || []) {
+            const app = slot.app;
+            if (!app) continue;
+            const selected = selG === g.id && selA === app.id;
+            const rb = String(slot.index % 8);
+            let meta = "";
+            if (launching.has(app.id)) meta = '<div class="meta">正在启动…</div>';
+            else if (running.has(app.id)) meta = '<div class="meta">运行中</div>';
+            const cls2 = ["card"];
+            if (selected) cls2.push("card--selected");
+            const title = esc(app.name);
+            const fullPath = String(app.path || "");
+            const subText = cardSubtitleText(app);
+            const subHtml =
+              '<p class="card__path" title="' + escAttr(fullPath) + '">' + esc(subText) + "</p>";
+            const iconBlock = cardIconBlock(app);
+            const launchLabel = app.kind === "url" ? "打开" : "启动";
+            const actions =
+              '<div class="actions">' +
+                '<button type="button" class="primary" data-launch="' + esc(app.id) + '">' + launchLabel + '</button>' +
+                '<button type="button" class="danger" data-close="' + esc(app.id) + '"' + (running.has(app.id) ? "" : " disabled") + ">关闭</button></div>";
+            const bodyInner =
+              '<div class="card__row">' +
+              iconBlock +
+              '<div class="card__body">' +
+              "<h3><span class=\"card__title\">" + title + "</span>" + (app.kind !== "url" ? cardFolderBtn(app.id) : "") + "</h3>" +
+              meta +
+              subHtml +
+              "</div></div>";
+            html +=
+              '<article class="' +
+              cls2.join(" ") +
+              '" data-slot-mini="' +
+              slot.index +
+              '" data-app-id="' +
+              esc(app.id) +
+              '" data-group-id="' +
+              escAttr(g.id) +
+              '"' +
+              (selected ? ' data-rainbow="' + rb + '"' : "") +
+              ">" +
+              bodyInner +
+              actions +
+              "</article>";
+          }
+          html +=
+            '<article class="card card--add-to-group" data-group-id="' +
+            escAttr(g.id) +
+            '" data-add-to-group="1"><h3>+ 添加</h3><p class="card__path" style="margin-top:0.35rem;text-align:center">从「全部」挑选</p></article>';
+          html += "</div></div></section>";
+        }
+        customGroupsRoot.innerHTML = html;
+      }
+
+      function render(s) {
+        if (!s) return;
+        cancelReorderDrag();
+        cancelCustomReorderDrag();
+        state = s;
+        statusEl.textContent = s.status_text || "";
+        statusEl.className = "status status--" + (s.status_kind || "ok");
+        if (document.activeElement !== searchEl) {
+          searchEl.value = s.search || "";
+        }
+        syncTabDockUi();
+        const tab = s.main_tab || "all";
+        if (tab === "all") {
+          renderAllGrid();
+        } else {
+          renderCustomGrid();
+        }
         applySkin(s.skin);
       }
 
       function getSelectedApp() {
-        if (!state || !state.selected_id) return null;
+        if (!state) return null;
+        if ((state.main_tab || "all") === "custom" && state.custom_selected_app_id) {
+          const cat = state.catalog_slots || [];
+          for (let i = 0; i < cat.length; i++) {
+            const sl = cat[i];
+            if (sl.app && sl.app.id === state.custom_selected_app_id) return sl.app;
+          }
+          return null;
+        }
+        if (!state.selected_id) return null;
         for (let i = 0; i < (state.slots || []).length; i++) {
           const sl = state.slots[i];
           if (sl.app && sl.app.id === state.selected_id) return sl.app;
@@ -1604,7 +2309,10 @@
         } else {
           const app = getSelectedApp();
           if (!app) {
-            statusEl.textContent = "请先单击选中一个应用卡片，再点「编辑」";
+            statusEl.textContent =
+              (state.main_tab || "all") === "custom"
+                ? "请先在自定义组中单击选中一张卡片，再点「编辑」"
+                : "请先单击选中一个应用卡片，再点「编辑」";
             statusEl.className = "status status--warn";
             setTimeout(function () {
               if (!state) return;
@@ -1713,7 +2421,7 @@
         }, 120);
       });
 
-      document.querySelector(".dock").addEventListener("click", async function (ev) {
+      dockAll.addEventListener("click", async function (ev) {
         const btn = ev.target.closest("button[data-act]");
         if (!btn) return;
         const act = btn.getAttribute("data-act");
@@ -1734,6 +2442,179 @@
         else if (act === "refresh") s = await api("refresh");
         else if (act === "up") s = await api("move_up");
         else if (act === "down") s = await api("move_down");
+        if (s) render(s);
+      });
+
+      dockCustom.addEventListener("click", async function (ev) {
+        const btn = ev.target.closest("button[data-act-custom]");
+        if (!btn || btn.disabled) return;
+        const act = btn.getAttribute("data-act-custom");
+        if (act === "add-to-group") {
+          const ag = state && state.active_custom_group_id;
+          if (!ag) {
+            openAlertModal("提示", "请先点击某个自定义组的标题，将该组设为当前组后再添加。");
+            return;
+          }
+          openGroupPickerModal(ag);
+          return;
+        }
+        if (act === "remove-from-group") {
+          const s = await api("custom_group_remove_ref");
+          if (s) render(s);
+          return;
+        }
+        if (act === "edit") {
+          openAppModal("edit");
+          return;
+        }
+        if (act === "refresh") {
+          const s = await api("refresh");
+          if (s) render(s);
+          return;
+        }
+        if (act === "up") {
+          const s = await api("custom_group_move_up");
+          if (s) render(s);
+          return;
+        }
+        if (act === "down") {
+          const s = await api("custom_group_move_down");
+          if (s) render(s);
+          return;
+        }
+      });
+
+      tabAll.addEventListener("click", async function () {
+        const s = await api("set_main_tab", "all");
+        if (s) render(s);
+      });
+      tabCustom.addEventListener("click", async function () {
+        const s = await api("set_main_tab", "custom");
+        if (s) render(s);
+      });
+
+      document.getElementById("btnNewCustomGroup").addEventListener("click", async function () {
+        const nm = window.prompt("新建自定义组名称", "新分组");
+        if (nm === null) return;
+        const s = await api("add_custom_group", nm.trim() || "新分组");
+        if (s) render(s);
+      });
+      document.getElementById("btnExpandAllGroups").addEventListener("click", async function () {
+        const s = await api("custom_groups_set_all_collapsed", false);
+        if (s) render(s);
+      });
+      document.getElementById("btnCollapseAllGroups").addEventListener("click", async function () {
+        const s = await api("custom_groups_set_all_collapsed", true);
+        if (s) render(s);
+      });
+
+      customGroupsRoot.addEventListener("click", async function (ev) {
+        const t = ev.target;
+        const head = t.closest("[data-group-toggle]");
+        if (head && !t.closest(".cg-group__actions")) {
+          const gid = head.getAttribute("data-group-toggle");
+          if (gid) {
+            const s = await api("toggle_custom_group_collapsed", gid);
+            if (s) render(s);
+          }
+          return;
+        }
+        const rbtn = t.closest("[data-group-rename]");
+        if (rbtn) {
+          const gid = rbtn.getAttribute("data-group-rename");
+          const cur =
+            ((state.custom_groups || []).find(function (x) {
+              return x.id === gid;
+            }) || {}).name || "";
+          const nm = window.prompt("组名称", cur);
+          if (nm !== null && gid) {
+            const s = await api("rename_custom_group", gid, nm.trim() || "未命名组");
+            if (s) render(s);
+          }
+          return;
+        }
+        const dbtn = t.closest("[data-group-delete]");
+        if (dbtn) {
+          const gid = dbtn.getAttribute("data-group-delete");
+          const ok = await showConfirm("删除自定义组", "确定删除该组？组内引用将被移除（不会删除「全部」中的条目）。");
+          if (ok && gid) {
+            const s = await api("delete_custom_group", gid);
+            if (s) render(s);
+          }
+          return;
+        }
+        const addC = t.closest("[data-add-to-group]");
+        if (addC) {
+          const gid = addC.getAttribute("data-group-id");
+          if (gid) {
+            const s0 = await api("set_active_custom_group", gid);
+            if (s0) render(s0);
+            openGroupPickerModal(gid);
+          }
+          return;
+        }
+        const folderBtn = t.closest(".card__folder-btn");
+        if (folderBtn) {
+          ev.stopPropagation();
+          const fid = folderBtn.getAttribute("data-app-id");
+          if (fid) {
+            const s = await api("open_app_folder", fid);
+            if (s) render(s);
+          }
+          return;
+        }
+        if (t.closest(".actions")) {
+          const btnL = t.closest("button[data-launch]");
+          const btnC = t.closest("button[data-close]");
+          const lid = btnL && btnL.getAttribute("data-launch");
+          const cid = btnC && btnC.getAttribute("data-close");
+          if (lid) {
+            const s = await api("launch", lid);
+            if (s) render(s);
+          } else if (cid && btnC && !btnC.disabled) {
+            const confirmed = await showConfirm("确认关闭", "确定要关闭这个应用吗？");
+            if (confirmed) {
+              const s = await api("close", cid);
+              if (s) render(s);
+            }
+          }
+          return;
+        }
+        const card = t.closest(".card");
+        if (card && card.getAttribute("data-app-id") && !card.classList.contains("card--add-to-group")) {
+          const gid = card.getAttribute("data-group-id");
+          const aid = card.getAttribute("data-app-id");
+          if (gid && aid) {
+            const s = await api("select_custom", gid, aid);
+            if (s) render(s);
+          }
+        }
+      });
+
+      customGroupsRoot.addEventListener("dblclick", async function (ev) {
+        if (ev.target.closest(".actions") || ev.target.closest(".card__folder-btn")) return;
+        const card = ev.target.closest(".card");
+        if (!card || card.classList.contains("card--add-to-group")) return;
+        const appId = card.getAttribute("data-app-id");
+        if (!appId) return;
+        const s = await api("launch", appId);
+        if (s) render(s);
+      });
+
+      groupPickerModal.addEventListener("click", function (ev) {
+        if (ev.target.closest("[data-picker-close]")) closeGroupPickerModal();
+      });
+      document.getElementById("groupPickerOk").addEventListener("click", async function () {
+        const ids = [];
+        groupPickerModal.querySelectorAll("input[data-pick-id]:checked").forEach(function (cb) {
+          ids.push(cb.getAttribute("data-pick-id"));
+        });
+        if (!pickerTargetGroupId) {
+          closeGroupPickerModal();
+          return;
+        }
+        const s = await api("custom_group_add_refs", pickerTargetGroupId, ids);
+        closeGroupPickerModal();
         if (s) render(s);
       });
 
@@ -1785,6 +2666,11 @@
             cancelReorderDrag();
             return;
           }
+          if (ev.key === "Escape" && customDragSession) {
+            ev.preventDefault();
+            cancelCustomReorderDrag();
+            return;
+          }
           if (ev.key !== "Escape") return;
           if (!settingsModal.hidden) {
             ev.preventDefault();
@@ -1804,6 +2690,12 @@
           if (!alertModal.hidden) {
             ev.preventDefault();
             closeAlertModal();
+            return;
+          }
+          if (!groupPickerModal.hidden) {
+            ev.preventDefault();
+            closeGroupPickerModal();
+            return;
           }
         });
       }
@@ -1866,13 +2758,31 @@
                 JSON.stringify(s.running_ids) +
                 s.status_text +
                 (s.skin || "") +
-                String(s.reorder_long_press_sec || "");
+                String(s.reorder_long_press_sec || "") +
+                String(s.main_tab || "") +
+                String(s.active_custom_group_id || "") +
+                String(s.custom_selected_app_id || "") +
+                String(s.custom_selected_group_id || "") +
+                JSON.stringify(
+                  (s.custom_groups || []).map(function (g) {
+                    return { id: g.id, c: g.collapsed, ids: g.item_ids || [] };
+                  })
+                );
               const b =
                 JSON.stringify(state.launching_ids) +
                 JSON.stringify(state.running_ids) +
                 state.status_text +
                 (state.skin || "") +
-                String(state.reorder_long_press_sec || "");
+                String(state.reorder_long_press_sec || "") +
+                String(state.main_tab || "") +
+                String(state.active_custom_group_id || "") +
+                String(state.custom_selected_app_id || "") +
+                String(state.custom_selected_group_id || "") +
+                JSON.stringify(
+                  (state.custom_groups || []).map(function (g) {
+                    return { id: g.id, c: g.collapsed, ids: g.item_ids || [] };
+                  })
+                );
               if (a !== b) render(s);
             }
           });
@@ -1886,6 +2796,7 @@
       }, 1200);
       bindGrid();
       bindReorderPointer();
+      bindCustomReorderPointer();
       bindFormModal();
       bindSettingsModal();
       bindConfirmAlert();

@@ -41,5 +41,18 @@
       "kind": "app",
       "url_browser": ""
     }
+  ],
+  "custom_groups": [
+    {
+      "id": "c01cbfd0-0ff5-4faf-a22c-93b9af1aeffc",
+      "name": "测试",
+      "collapsed": false,
+      "item_ids": [
+        "3c09aef3-596a-43d0-a2f0-ed84e4e8d939",
+        "10d38599-a960-4f8c-9b0a-d4dfa984ed4f",
+        "41c35a02-b9c5-4eb6-9eea-cfc7ee3a89df",
+        "90467408-f924-4855-a352-54e39cab0e4d"
+      ]
+    }
   ]
 }

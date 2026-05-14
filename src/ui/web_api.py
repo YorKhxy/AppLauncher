@@ -1,6 +1,7 @@
 import os
 import threading
 import tkinter as tk
+import uuid
 from pathlib import Path
 from tkinter import filedialog
 from typing import Any, Callable, Dict, List, Optional, Set
@@ -66,6 +67,12 @@ class LauncherApi:
 
         self._pending_action: Optional[Dict[str, Any]] = None
 
+        self.custom_groups: List[Dict[str, Any]] = []
+        self.main_tab: str = "all"
+        self.active_custom_group_id: Optional[str] = None
+        self.custom_selected_group_id: Optional[str] = None
+        self.custom_selected_app_id: Optional[str] = None
+
     def _ensure_tk(self) -> None:
         with self._tk_lock:
             if self._tk_thread is not None:
@@ -130,8 +137,56 @@ class LauncherApi:
     def _slots(self) -> List[Optional[AppItem]]:
         return list(self.displayed_apps)
 
+    def _app_by_id(self, app_id: str) -> Optional[AppItem]:
+        for a in self.apps:
+            if a.id == app_id:
+                return a
+        return None
+
+    def _build_custom_groups_payload(self) -> List[Dict[str, Any]]:
+        m = {a.id: a for a in self.apps}
+        out: List[Dict[str, Any]] = []
+        for g in self.custom_groups:
+            slots: List[Dict[str, Any]] = []
+            for i, aid in enumerate(g.get("item_ids", [])):
+                app = m.get(aid)
+                if app:
+                    slots.append({"index": i, "app": _app_dict_for_ui(app)})
+            out.append(
+                {
+                    "id": g["id"],
+                    "name": g.get("name") or "未命名组",
+                    "collapsed": bool(g.get("collapsed", False)),
+                    "item_ids": list(g.get("item_ids", [])),
+                    "slots": slots,
+                }
+            )
+        return out
+
+    def _ensure_active_group(self) -> None:
+        if not self.custom_groups:
+            self.active_custom_group_id = None
+            return
+        ids = {str(g.get("id")) for g in self.custom_groups}
+        cur = self.active_custom_group_id
+        if not cur or cur not in ids:
+            self.active_custom_group_id = str(self.custom_groups[0].get("id"))
+
+    def _sanitize_custom_selection(self) -> None:
+        gid = self.custom_selected_group_id
+        aid = self.custom_selected_app_id
+        if not gid or not aid:
+            self.custom_selected_group_id = None
+            self.custom_selected_app_id = None
+            return
+        g = next((x for x in self.custom_groups if str(x.get("id")) == gid), None)
+        if not g or aid not in g.get("item_ids", []):
+            self.custom_selected_group_id = None
+            self.custom_selected_app_id = None
+
     def get_state(self) -> Dict[str, Any]:
         slots = [{"index": i, "app": _app_dict_for_ui(app)} for i, app in enumerate(self._slots())]
+        catalog_slots = [{"index": i, "app": _app_dict_for_ui(app)} for i, app in enumerate(self.apps)]
         ui = self.ui_settings.load()
         return {
             "slots": slots,
@@ -144,6 +199,12 @@ class LauncherApi:
             "skin": ui["skin"],
             "reorder_long_press_sec": ui["reorder_long_press_sec"],
             "total_count": len(self.displayed_apps),
+            "main_tab": self.main_tab,
+            "active_custom_group_id": self.active_custom_group_id,
+            "custom_selected_group_id": self.custom_selected_group_id,
+            "custom_selected_app_id": self.custom_selected_app_id,
+            "catalog_slots": catalog_slots,
+            "custom_groups": self._build_custom_groups_payload(),
         }
 
     def save_ui_settings(self, data: Any) -> Dict[str, Any]:
@@ -156,6 +217,9 @@ class LauncherApi:
 
     def load(self) -> Dict[str, Any]:
         self.apps = self.config_service.load_config()
+        self.custom_groups = self.config_service.load_custom_groups()
+        self._ensure_active_group()
+        self._sanitize_custom_selection()
         self._apply_filter()
         return self.get_state()
 
@@ -268,10 +332,10 @@ class LauncherApi:
                 if i == 0:
                     return self.get_state()
                 apps[i], apps[i - 1] = apps[i - 1], apps[i]
-                self.config_service.save_config(apps)
-                self.load()
-                self.selected_app_id = target_id
+                self.config_service.save_apps_and_custom_groups(apps, self.custom_groups)
+                self.apps = apps
                 self._apply_filter()
+                self.selected_app_id = target_id
                 return self.get_state()
         return self.get_state()
 
@@ -285,10 +349,10 @@ class LauncherApi:
                 if i == len(apps) - 1:
                     return self.get_state()
                 apps[i], apps[i + 1] = apps[i + 1], apps[i]
-                self.config_service.save_config(apps)
-                self.load()
-                self.selected_app_id = target_id
+                self.config_service.save_apps_and_custom_groups(apps, self.custom_groups)
+                self.apps = apps
                 self._apply_filter()
+                self.selected_app_id = target_id
                 return self.get_state()
         return self.get_state()
 
@@ -466,16 +530,187 @@ class LauncherApi:
             apps.insert(insert_idx, item)
         else:
             if not before_id or before_id == from_id:
-                return self.load()
+                return self.get_state()
             to_idx = next((i for i, a in enumerate(apps) if a.id == before_id), None)
             if to_idx is None:
                 return self.get_state()
             if to_idx == from_idx:
-                return self.load()
+                return self.get_state()
             apps[from_idx], apps[to_idx] = apps[to_idx], apps[from_idx]
 
-        self.config_service.save_config(apps)
-        self.load()
+        self.config_service.save_apps_and_custom_groups(apps, self.custom_groups)
+        self.apps = apps
         self.selected_app_id = from_id
         self._apply_filter()
+        return self.get_state()
+
+    def set_main_tab(self, tab: Any) -> Dict[str, Any]:
+        t = str(tab or "").strip().lower()
+        if t not in ("all", "custom"):
+            t = "all"
+        self.main_tab = t
+        if t == "all":
+            self.custom_selected_group_id = None
+            self.custom_selected_app_id = None
+        if t == "custom":
+            self._ensure_active_group()
+        return self.get_state()
+
+    def set_active_custom_group(self, group_id: Any) -> Dict[str, Any]:
+        gid = str(group_id or "").strip()
+        if gid and any(str(g.get("id")) == gid for g in self.custom_groups):
+            self.active_custom_group_id = gid
+        return self.get_state()
+
+    def select_custom(self, group_id: Any, app_id: Any) -> Dict[str, Any]:
+        gid = str(group_id or "").strip()
+        aid = str(app_id or "").strip()
+        g = next((x for x in self.custom_groups if str(x.get("id")) == gid), None)
+        if g and aid in g.get("item_ids", []):
+            self.custom_selected_group_id = gid
+            self.custom_selected_app_id = aid
+            self.active_custom_group_id = gid
+            self.selected_app_id = aid
+        else:
+            self.custom_selected_group_id = None
+            self.custom_selected_app_id = None
+        return self.get_state()
+
+    def toggle_custom_group_collapsed(self, group_id: Any) -> Dict[str, Any]:
+        gid = str(group_id or "").strip()
+        for g in self.custom_groups:
+            if str(g.get("id")) == gid:
+                self.active_custom_group_id = gid
+                g["collapsed"] = not bool(g.get("collapsed", False))
+                break
+        self.config_service.save_apps_and_custom_groups(self.apps, self.custom_groups)
+        return self.get_state()
+
+    def custom_groups_set_all_collapsed(self, collapsed: Any) -> Dict[str, Any]:
+        c = bool(collapsed)
+        for g in self.custom_groups:
+            g["collapsed"] = c
+        self.config_service.save_apps_and_custom_groups(self.apps, self.custom_groups)
+        return self.get_state()
+
+    def add_custom_group(self, name: Any) -> Dict[str, Any]:
+        n = str(name or "").strip() or "新分组"
+        g = {"id": str(uuid.uuid4()), "name": n, "collapsed": False, "item_ids": []}
+        self.custom_groups.append(g)
+        self.active_custom_group_id = g["id"]
+        self.config_service.save_apps_and_custom_groups(self.apps, self.custom_groups)
+        return self.get_state()
+
+    def rename_custom_group(self, group_id: Any, name: Any) -> Dict[str, Any]:
+        gid = str(group_id or "").strip()
+        n = str(name or "").strip() or "未命名组"
+        for g in self.custom_groups:
+            if str(g.get("id")) == gid:
+                g["name"] = n
+                break
+        self.config_service.save_apps_and_custom_groups(self.apps, self.custom_groups)
+        return self.get_state()
+
+    def delete_custom_group(self, group_id: Any) -> Dict[str, Any]:
+        gid = str(group_id or "").strip()
+        self.custom_groups = [g for g in self.custom_groups if str(g.get("id")) != gid]
+        if self.active_custom_group_id == gid:
+            self.active_custom_group_id = None
+        if self.custom_selected_group_id == gid:
+            self.custom_selected_group_id = None
+            self.custom_selected_app_id = None
+        self._ensure_active_group()
+        self.config_service.save_apps_and_custom_groups(self.apps, self.custom_groups)
+        return self.get_state()
+
+    def custom_group_add_refs(self, group_id: Any, app_ids: Any) -> Dict[str, Any]:
+        if not isinstance(app_ids, list):
+            app_ids = []
+        gid = str(group_id or "").strip()
+        g = next((x for x in self.custom_groups if str(x.get("id")) == gid), None)
+        if not g:
+            return self.get_state()
+        valid = {a.id for a in self.apps}
+        seen = set(str(x) for x in g.get("item_ids", []))
+        for raw in app_ids:
+            aid = str(raw or "").strip()
+            if aid in valid and aid not in seen:
+                g.setdefault("item_ids", []).append(aid)
+                seen.add(aid)
+        self.config_service.save_apps_and_custom_groups(self.apps, self.custom_groups)
+        return self.get_state()
+
+    def custom_group_remove_ref(self, group_id: Any = None, app_id: Any = None) -> Dict[str, Any]:
+        gid = str(group_id or "").strip() or (self.active_custom_group_id or "")
+        aid = str(app_id or "").strip() or (self.custom_selected_app_id or "")
+        g = next((x for x in self.custom_groups if str(x.get("id")) == gid), None)
+        if not g or not aid:
+            return self.get_state()
+        g["item_ids"] = [x for x in g.get("item_ids", []) if x != aid]
+        if self.custom_selected_app_id == aid and self.custom_selected_group_id == gid:
+            self.custom_selected_group_id = None
+            self.custom_selected_app_id = None
+        self.config_service.save_apps_and_custom_groups(self.apps, self.custom_groups)
+        return self.get_state()
+
+    def custom_group_move_up(self) -> Dict[str, Any]:
+        gid = str(self.active_custom_group_id or "").strip()
+        aid = str(self.custom_selected_app_id or "").strip()
+        g = next((x for x in self.custom_groups if str(x.get("id")) == gid), None)
+        if not g or not aid:
+            return self.get_state()
+        ids = list(g.get("item_ids", []))
+        if aid not in ids:
+            return self.get_state()
+        i = ids.index(aid)
+        if i > 0:
+            ids[i - 1], ids[i] = ids[i], ids[i - 1]
+            g["item_ids"] = ids
+            self.config_service.save_apps_and_custom_groups(self.apps, self.custom_groups)
+        return self.get_state()
+
+    def custom_group_move_down(self) -> Dict[str, Any]:
+        gid = str(self.active_custom_group_id or "").strip()
+        aid = str(self.custom_selected_app_id or "").strip()
+        g = next((x for x in self.custom_groups if str(x.get("id")) == gid), None)
+        if not g or not aid:
+            return self.get_state()
+        ids = list(g.get("item_ids", []))
+        if aid not in ids:
+            return self.get_state()
+        i = ids.index(aid)
+        if i < len(ids) - 1:
+            ids[i + 1], ids[i] = ids[i], ids[i + 1]
+            g["item_ids"] = ids
+            self.config_service.save_apps_and_custom_groups(self.apps, self.custom_groups)
+        return self.get_state()
+
+    def custom_group_reorder(self, payload: Any) -> Dict[str, Any]:
+        if not isinstance(payload, dict):
+            return self.get_state()
+        group_id = str(payload.get("group_id") or "").strip()
+        from_id = str(payload.get("from_id") or "").strip()
+        before_id = str(payload.get("before_id") or "").strip()
+        g = next((x for x in self.custom_groups if str(x.get("id")) == group_id), None)
+        if not g or not from_id:
+            return self.get_state()
+        ids = list(g.get("item_ids", []))
+        from_idx = next((i for i, x in enumerate(ids) if x == from_id), None)
+        if from_idx is None:
+            return self.get_state()
+        if before_id == REORDER_BEFORE_ADD:
+            insert_idx = len(ids)
+            item = ids.pop(from_idx)
+            if insert_idx > from_idx:
+                insert_idx -= 1
+            ids.insert(insert_idx, item)
+        else:
+            if not before_id or before_id == from_id:
+                return self.get_state()
+            to_idx = next((i for i, x in enumerate(ids) if x == before_id), None)
+            if to_idx is None or to_idx == from_idx:
+                return self.get_state()
+            ids[from_idx], ids[to_idx] = ids[to_idx], ids[from_idx]
+        g["item_ids"] = ids
+        self.config_service.save_apps_and_custom_groups(self.apps, self.custom_groups)
         return self.get_state()
