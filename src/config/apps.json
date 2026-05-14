@@ -2,20 +2,34 @@
   "version": "1.0",
   "apps": [
     {
-      "id": "06ccc8ff-777c-4eb2-a12c-787e50735cfc",
-      "name": "中控",
-      "path": "G:/gamestart-v1.34/gamestart/启动.bat",
+      "id": "90467408-f924-4855-a352-54e39cab0e4d",
+      "name": "总控",
+      "path": "http://172.0.0.218:36002/",
       "working_dir": "",
       "icon": "",
-      "description": ""
+      "description": "",
+      "kind": "url",
+      "url_browser": "edge"
     },
     {
-      "id": "3ad8f881-a1cb-4080-9f42-5331044fff1f",
-      "name": "绝境突围",
-      "path": "G:/gamestart-v1.34/gamestart/CS_Server/绝境突围.bat",
+      "id": "10d38599-a960-4f8c-9b0a-d4dfa984ed4f",
+      "name": "开发版本",
+      "path": "D:/新建文件夹/朋克编码开发者工具-开发版-v0.1.0/punkdevelop_windows.exe",
       "working_dir": "",
       "icon": "",
-      "description": ""
+      "description": "",
+      "kind": "app",
+      "url_browser": ""
+    },
+    {
+      "id": "3c09aef3-596a-43d0-a2f0-ed84e4e8d939",
+      "name": "内网218",
+      "path": "http://172.0.0.218:36003/",
+      "working_dir": "",
+      "icon": "",
+      "description": "",
+      "kind": "url",
+      "url_browser": "chrome"
     }
   ]
 }

@@ -138,16 +138,9 @@
       font-size: 0.95rem;
     }
     .search input::placeholder { color: var(--muted); }
-    .section-hint {
-      font-size: 0.78rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      color: var(--cyan-dim);
-      margin-bottom: 0.75rem;
-    }
     .card-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 0.75rem 0.65rem;
       max-height: calc(100vh - 300px);
       overflow-y: auto;
@@ -156,29 +149,116 @@
     }
     .card {
       position: relative;
+      display: flex;
+      flex-direction: column;
       border-radius: 14px;
-      padding: 0.85rem 0.75rem 0.7rem;
-      min-height: 132px;
+      padding: 0.75rem 0.7rem 0.65rem;
+      min-height: 148px;
       background: linear-gradient(180deg, var(--elev) 0%, rgba(15, 23, 42, 0.65) 100%);
       border: 1px solid rgba(51, 65, 85, 0.9);
       transition: transform 0.2s ease, box-shadow 0.25s ease;
       cursor: pointer;
     }
+    .card__row {
+      display: flex;
+      gap: 0.7rem;
+      align-items: stretch;
+      flex: 1;
+      min-height: 0;
+    }
+    .card__icon {
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      border: 1px solid rgba(71, 85, 105, 0.8);
+      background: rgba(8, 14, 28, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .card__icon-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .card__icon-img.is-bad {
+      display: none;
+    }
+    .card__icon-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card__icon-fallback.is-hide {
+      display: none;
+    }
+    .card__icon-letter {
+      font-family: Orbitron, sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      color: var(--cyan);
+      line-height: 1;
+    }
+    .card__icon--url {
+      color: var(--cyan-dim);
+      border-color: rgba(34, 211, 238, 0.35);
+      background: rgba(12, 22, 42, 0.75);
+    }
+    .card__icon-svg {
+      width: 26px;
+      height: 26px;
+      opacity: 0.92;
+    }
+    .card__body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+    .card__body h3 {
+      margin: 0;
+      font-family: Orbitron, sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      line-height: 1.25;
+    }
+    .card__path {
+      margin: 0.1rem 0 0;
+      font-size: 0.62rem;
+      color: var(--muted);
+      line-height: 1.35;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      word-break: break-word;
+      cursor: default;
+    }
     .card:hover:not(.card--selected) {
       transform: translateY(-2px);
       box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
     }
-    .card h3 {
-      margin: 0 0 0.35rem;
-      font-family: Orbitron, sans-serif;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+    .card .meta {
+      font-size: 0.6rem;
+      color: var(--cyan-dim);
+      margin: 0;
     }
-    .card p { margin: 0 0 0.5rem; font-size: 0.68rem; color: var(--muted); line-height: 1.35; word-break: break-all; }
-    .card .meta { font-size: 0.62rem; color: var(--cyan-dim); margin-bottom: 0.45rem; }
-    .card .actions { display: flex; gap: 0.4rem; }
+    .card .actions {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: auto;
+      padding-top: 0.55rem;
+      flex-shrink: 0;
+    }
     .card button {
       flex: 1;
       font-family: "Exo 2", sans-serif;
@@ -205,7 +285,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 132px;
+      min-height: 148px;
       transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease, background 0.2s ease;
     }
     .card--add-new:hover {
@@ -233,6 +313,63 @@
     }
     .card--add-new:hover p {
       opacity: 1;
+    }
+    .card--add-new.card--drop-target {
+      border-color: var(--cyan);
+      outline: 3px solid var(--cyan);
+      outline-offset: 2px;
+      box-shadow:
+        0 0 0 2px rgba(34, 211, 238, 0.45),
+        0 0 36px rgba(34, 211, 238, 0.35),
+        0 12px 40px rgba(0, 0, 0, 0.45);
+      background: linear-gradient(180deg, rgba(17, 28, 51, 0.88) 0%, rgba(11, 18, 36, 0.7) 100%);
+      z-index: 5;
+    }
+    @keyframes reorder-border-shake {
+      0%, 100% { transform: translateX(0); border-color: var(--cyan); }
+      20% { transform: translateX(-3px); border-color: var(--violet); }
+      40% { transform: translateX(3px); border-color: var(--cyan); }
+      60% { transform: translateX(-2px); }
+      80% { transform: translateX(2px); }
+    }
+    .card--drag-armed {
+      animation: reorder-border-shake 0.45s ease-in-out 1;
+      z-index: 3;
+    }
+    .card--drag-source {
+      opacity: 0.38;
+      box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.35);
+    }
+    .card--drop-target:not(.card--drag-source) {
+      position: relative;
+      z-index: 5;
+      border-color: var(--cyan) !important;
+      outline: 3px solid var(--cyan);
+      outline-offset: 2px;
+      box-shadow:
+        0 0 0 2px var(--input-focus-glow),
+        0 0 28px rgba(34, 211, 238, 0.55),
+        0 12px 40px rgba(0, 0, 0, 0.45);
+    }
+    .reorder-ghost {
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+      left: 0;
+      top: 0;
+      max-width: 200px;
+      padding: 0.55rem 0.65rem;
+      border-radius: 12px;
+      background: linear-gradient(180deg, var(--elev) 0%, rgba(15, 23, 42, 0.92) 100%);
+      border: 1px solid var(--card-primary-border);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
+      font-family: Orbitron, sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      transform: translate(-50%, -50%);
+      opacity: 0.95;
     }
     .card--selected {
       border-color: transparent;
@@ -312,8 +449,70 @@
       background: rgba(16, 27, 51, 0.95);
       color: var(--text);
       cursor: pointer;
+      transition:
+        transform 0.2s cubic-bezier(0.34, 1.3, 0.64, 1),
+        box-shadow 0.22s ease,
+        border-color 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease,
+        filter 0.2s ease;
     }
-    .dock button.accent { border-color: var(--dock-accent-border); color: var(--cyan); }
+    .dock button:hover:not(:disabled) {
+      transform: translateY(-2px) scale(1.03);
+      border-color: var(--card-primary-border);
+      color: var(--cyan);
+      background: rgba(20, 38, 62, 0.98);
+      box-shadow:
+        0 0 0 1px var(--input-focus-glow),
+        0 10px 28px rgba(0, 0, 0, 0.42),
+        0 0 20px var(--chrome-glow-outer);
+      filter: brightness(1.08);
+    }
+    .dock button.accent {
+      border-color: var(--dock-accent-border);
+      color: var(--cyan);
+    }
+    .dock button.accent:hover:not(:disabled) {
+      border-color: var(--cyan);
+      color: var(--text);
+      background: linear-gradient(
+        165deg,
+        color-mix(in srgb, var(--cyan) 26%, transparent) 0%,
+        rgba(16, 27, 51, 0.98) 100%
+      );
+      box-shadow:
+        0 0 0 2px var(--input-focus-border),
+        0 0 24px var(--input-focus-glow),
+        0 12px 32px rgba(0, 0, 0, 0.45);
+      filter: brightness(1.12);
+    }
+    .dock button:active:not(:disabled) {
+      transform: translateY(0) scale(0.97);
+      transition-duration: 0.08s;
+      box-shadow:
+        inset 0 2px 10px rgba(0, 0, 0, 0.45),
+        0 0 0 1px var(--input-focus-glow);
+      filter: brightness(0.95);
+    }
+    .dock button.accent:active:not(:disabled) {
+      background: linear-gradient(
+        165deg,
+        color-mix(in srgb, var(--cyan) 40%, transparent) 0%,
+        rgba(12, 22, 42, 0.98) 100%
+      );
+    }
+    .dock button:focus-visible {
+      outline: none;
+      box-shadow:
+        0 0 0 2px var(--cyan),
+        0 0 16px var(--input-focus-glow);
+    }
+    .dock button:focus-visible:hover:not(:disabled) {
+      box-shadow:
+        0 0 0 2px var(--cyan),
+        0 0 20px var(--input-focus-glow),
+        0 10px 28px rgba(0, 0, 0, 0.42);
+    }
     .dock .sep {
       font-family: Orbitron, sans-serif;
       font-size: 0.58rem;
@@ -404,6 +603,11 @@
     .form-field {
       margin-bottom: 0.95rem;
     }
+    .form-field p.sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
     .form-field label {
       display: block;
       font-size: 0.65rem;
@@ -414,7 +618,8 @@
       margin-bottom: 0.35rem;
     }
     .form-field input,
-    .form-field textarea {
+    .form-field textarea,
+    .form-field select {
       width: 100%;
       padding: 0.5rem 0.65rem;
       border-radius: 10px;
@@ -425,8 +630,12 @@
       font-size: 0.88rem;
       outline: none;
     }
+    .form-field select {
+      cursor: pointer;
+    }
     .form-field input:focus,
-    .form-field textarea:focus {
+    .form-field textarea:focus,
+    .form-field select:focus {
       border-color: var(--input-focus-border);
       box-shadow: 0 0 0 1px var(--input-focus-glow);
     }
@@ -458,6 +667,29 @@
     }
     .path-row button:hover {
       background: var(--browse-hover-bg);
+    }
+    .kind-toggle {
+      display: flex;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(51, 65, 85, 0.95);
+    }
+    .kind-toggle button {
+      flex: 1;
+      padding: 0.52rem 0.5rem;
+      border: none;
+      background: rgba(7, 13, 26, 0.95);
+      color: var(--muted);
+      font-family: Orbitron, sans-serif;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+    }
+    .kind-toggle button.is-active {
+      background: rgba(34, 211, 238, 0.16);
+      color: var(--cyan);
+      box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.35);
     }
     .form-modal__foot {
       display: flex;
@@ -553,12 +785,45 @@
         radial-gradient(ellipse 48% 42% at 48% 48%, rgba(167, 243, 208, 0.06), transparent 70%);
     }
 
+    html.skin-shadow {
+      --void: #09090b;
+      --surface: #18181b;
+      --elev: #1f1f23;
+      --cyan: #a1a1aa;
+      --cyan-dim: #71717a;
+      --magenta: #d4d4d8;
+      --violet: #94a3b8;
+      --rose: #f87171;
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --grid-line: rgba(161, 161, 170, 0.08);
+      --chrome-border: rgba(113, 113, 122, 0.45);
+      --chrome-glow-outer: rgba(82, 82, 91, 0.08);
+      --search-border: rgba(161, 161, 170, 0.45);
+      --card-primary-border: rgba(161, 161, 170, 0.45);
+      --dock-accent-border: rgba(212, 212, 216, 0.55);
+      --modal-shell-border: rgba(113, 113, 122, 0.5);
+      --modal-shell-glow: rgba(63, 63, 70, 0.12);
+      --modal-cap-line: rgba(82, 82, 91, 0.35);
+      --input-focus-border: rgba(212, 212, 216, 0.65);
+      --input-focus-glow: rgba(161, 161, 170, 0.2);
+      --browse-hover-bg: rgba(161, 161, 170, 0.12);
+      --form-primary-border: rgba(212, 212, 216, 0.55);
+      --atm-blob-mid: rgba(82, 82, 91, 0.14);
+    }
+    html.skin-shadow .atmosphere {
+      background:
+        radial-gradient(ellipse 110% 70% at 15% -5%, rgba(113, 113, 122, 0.2), transparent 50%),
+        radial-gradient(ellipse 90% 55% at 88% 100%, rgba(63, 63, 70, 0.18), transparent 48%),
+        radial-gradient(ellipse 50% 42% at 50% 50%, rgba(82, 82, 91, 0.06), transparent 72%);
+    }
+
     #settingsModal .form-modal__panel {
       width: min(520px, 100%);
     }
     .skin-pick-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
       gap: 0.65rem;
       margin-bottom: 0.5rem;
     }
@@ -612,6 +877,9 @@
     .skin-card[data-skin="aurora"] .skin-card__sw {
       background: linear-gradient(120deg, #14b8a6, #5eead4, #6ee7b7);
     }
+    .skin-card[data-skin="shadow"] .skin-card__sw {
+      background: linear-gradient(120deg, #52525b, #a1a1aa, #e4e4e7);
+    }
 
     .form-err {
       margin: 0.65rem 0 0;
@@ -646,7 +914,7 @@
     <button type="button" data-act="edit">编辑</button>
     <button type="button" data-act="del">删除</button>
     <button type="button" data-act="refresh">刷新</button>
-    <button type="button" data-act="settings">⚙ 外观</button>
+    <button type="button" data-act="settings">⚙ 设置</button>
     <span class="sep">排序</span>
     <button type="button" data-act="up">上移</button>
     <button type="button" data-act="down">下移</button>
@@ -662,15 +930,31 @@
       <div class="form-modal__body">
         <p class="sub" id="formModalSub">填写名称与可执行路径；可选工作目录与备注。</p>
         <div class="form-field">
+          <label>类型</label>
+          <div class="kind-toggle" id="fKindToggle" role="group" aria-label="添加类型">
+            <button type="button" class="is-active" data-kind="app">本地应用</button>
+            <button type="button" data-kind="url">网页链接</button>
+          </div>
+        </div>
+        <div class="form-field">
           <label for="fName">应用名称</label>
           <input id="fName" type="text" autocomplete="off" placeholder="例如：中控" />
         </div>
         <div class="form-field">
-          <label for="fPath">应用路径</label>
+          <label for="fPath" id="fPathLabel">应用路径</label>
           <div class="path-row">
             <input id="fPath" type="text" autocomplete="off" placeholder="C:\Path\app.exe" />
             <button type="button" id="fBrowse">浏览</button>
           </div>
+        </div>
+        <div class="form-field" id="fUrlBrowserRow" hidden>
+          <label for="fUrlBrowser">使用的浏览器</label>
+          <select id="fUrlBrowser">
+            <option value="default">系统默认</option>
+            <option value="edge">Microsoft Edge</option>
+            <option value="chrome">Google Chrome</option>
+            <option value="qq">QQ 浏览器</option>
+          </select>
         </div>
         <div class="form-field" style="display:none">
           <label for="fWd">工作目录（可选）</label>
@@ -697,11 +981,11 @@
     <div class="form-modal__backdrop" data-settings-close tabindex="-1"></div>
     <div class="form-modal__panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
       <div class="form-modal__cap">
-        <h2 id="settingsTitle">外观设置</h2>
+        <h2 id="settingsTitle">外观与交互</h2>
         <button type="button" data-settings-close aria-label="关闭">✕</button>
       </div>
       <div class="form-modal__body">
-        <p class="sub">选择界面皮肤，保存后即时生效并写入配置文件。</p>
+        <p class="sub">皮肤与长按排序触发时间保存后写入配置文件并即时生效。</p>
         <div class="skin-pick-grid" id="skinPickGrid">
           <button type="button" class="skin-card" data-skin="neon">
             <div class="skin-card__sw" aria-hidden="true"></div>
@@ -718,6 +1002,16 @@
             <div class="skin-card__name">极光</div>
             <div class="skin-card__desc">青绿薄荷</div>
           </button>
+          <button type="button" class="skin-card" data-skin="shadow">
+            <div class="skin-card__sw" aria-hidden="true"></div>
+            <div class="skin-card__name">暗影</div>
+            <div class="skin-card__desc">冷灰金属</div>
+          </button>
+        </div>
+        <div class="form-field" style="margin-top: 0.75rem">
+          <label for="reorderLongPressSec">长按排序触发时间（秒）</label>
+          <input id="reorderLongPressSec" type="number" min="1" max="8" step="0.5" value="3" />
+          <p class="sub" style="margin-top: 0.55rem; margin-bottom: 0">排序：在应用卡片上长按至边框振动即可拖动；拖到另一张卡片上时该卡外框高亮表示将与它互换位置；拖到「+ 添加应用」为移到末尾。</p>
         </div>
         <p id="settingsErr" class="form-err" aria-live="polite"></p>
         <div class="form-modal__foot">
@@ -766,6 +1060,9 @@
   <script>
     (function () {
       const RAINBOW_NAMES = ["赤", "橙", "黄", "绿", "青", "蓝", "靛", "紫"];
+      const REORDER_BEFORE_ADD = "__add_new__";
+      const REORDER_MOVE_CANCEL_PX = 14;
+      const REORDER_DRAG_COMMIT_PX = 10;
       const gridEl = document.getElementById("cardGrid");
       const statusEl = document.getElementById("statusLine");
       const searchEl = document.getElementById("searchInput");
@@ -781,6 +1078,11 @@
       const fIcon = document.getElementById("fIcon");
       const fDesc = document.getElementById("fDesc");
       const fError = document.getElementById("fError");
+      const fKindToggle = document.getElementById("fKindToggle");
+      const fPathLabel = document.getElementById("fPathLabel");
+      const fBrowse = document.getElementById("fBrowse");
+      const fUrlBrowserRow = document.getElementById("fUrlBrowserRow");
+      const fUrlBrowser = document.getElementById("fUrlBrowser");
       const settingsModal = document.getElementById("settingsModal");
       const settingsErr = document.getElementById("settingsErr");
       const skinPickGrid = document.getElementById("skinPickGrid");
@@ -788,7 +1090,27 @@
       let searchDebounce = null;
       let started = false;
       let formEditId = null;
+      let formKind = "app";
       let pendingSkin = "neon";
+
+      const VALID_URL_BROWSERS = ["default", "edge", "chrome", "qq"];
+
+      function syncFormKind() {
+        fKindToggle.querySelectorAll("button[data-kind]").forEach(function (btn) {
+          btn.classList.toggle("is-active", btn.getAttribute("data-kind") === formKind);
+        });
+        if (formKind === "url") {
+          fPathLabel.textContent = "网页地址";
+          fPath.setAttribute("placeholder", "https://example.com 或 example.com");
+          fBrowse.hidden = true;
+          fUrlBrowserRow.hidden = false;
+        } else {
+          fPathLabel.textContent = "应用路径";
+          fPath.setAttribute("placeholder", "C:\\Path\\app.exe");
+          fBrowse.hidden = false;
+          fUrlBrowserRow.hidden = true;
+        }
+      }
 
       let _confirmResolve = null;
 
@@ -834,11 +1156,69 @@
           .replace(/"/g, "&quot;");
       }
 
-      const VALID_SKINS = ["neon", "ember", "aurora"];
+      function escAttr(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function pathBasename(p) {
+        var s = String(p || "").replace(/\\/g, "/");
+        var n = s.lastIndexOf("/");
+        return n >= 0 ? s.slice(n + 1) : s;
+      }
+
+      function cardSubtitleText(app) {
+        var d = String(app.description || "").trim();
+        if (d) return d.length > 50 ? d.slice(0, 48) + "\u2026" : d;
+        if (app.kind === "url") {
+          var raw = String(app.path || "").trim();
+          try {
+            var u = raw;
+            if (!/^https?:\/\//i.test(u)) u = "https://" + u.replace(/^\/+/, "");
+            var h = new URL(u).hostname;
+            return h && h.length ? (h.length > 44 ? h.slice(0, 42) + "\u2026" : h) : pathBasename(raw);
+          } catch (e) {
+            return pathBasename(raw);
+          }
+        }
+        var b = pathBasename(app.path);
+        return b.length > 46 ? b.slice(0, 44) + "\u2026" : b;
+      }
+
+      function cardIconBlock(app) {
+        var iconUrl = String(app.icon_display_url || "").trim();
+        var ch = String(app.name || "?").charAt(0);
+        var letter = esc(ch);
+        var urlSvg =
+          '<svg class="card__icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.65"/><path d="M3 12h18M12 3c4 4 4 14 0 18M12 3c-4 4-4 14 0 18" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"/></svg>';
+        if (iconUrl) {
+          return (
+            '<div class="card__icon" aria-hidden="true">' +
+            '<img class="card__icon-img" src="' +
+            escAttr(iconUrl) +
+            '" alt="" loading="lazy" onerror="this.classList.add(\'is-bad\');var n=this.nextElementSibling;if(n)n.classList.remove(\'is-hide\');" />' +
+            '<div class="card__icon-fallback is-hide"><span class="card__icon-letter">' +
+            letter +
+            "</span></div></div>"
+          );
+        }
+        if (app.kind === "url") {
+          return '<div class="card__icon card__icon--url" aria-hidden="true">' + urlSvg + "</div>";
+        }
+        return (
+          '<div class="card__icon card__icon--app" aria-hidden="true"><span class="card__icon-letter">' +
+          letter +
+          "</span></div>"
+        );
+      }
+
+      const VALID_SKINS = ["neon", "ember", "aurora", "shadow"];
 
       function applySkin(skin) {
         const k = skin && VALID_SKINS.indexOf(skin) >= 0 ? skin : "neon";
-        document.documentElement.classList.remove("skin-neon", "skin-ember", "skin-aurora");
+        document.documentElement.classList.remove("skin-neon", "skin-ember", "skin-aurora", "skin-shadow");
         document.documentElement.classList.add("skin-" + k);
       }
 
@@ -856,6 +1236,9 @@
       function openSettingsModal() {
         settingsErr.textContent = "";
         pendingSkin = (state && state.skin) || "neon";
+        var rps = state && state.reorder_long_press_sec != null ? Number(state.reorder_long_press_sec) : 3;
+        var rpv = isFinite(rps) ? Math.max(1, Math.min(8, rps)) : 3;
+        document.getElementById("reorderLongPressSec").value = String(rpv);
         settingsModal.hidden = false;
         updateBodyScrollLock();
         syncSkinCards();
@@ -880,8 +1263,196 @@
         updateBodyScrollLock();
       }
 
+      let dragSession = null;
+      var blockGridClickUntil = 0;
+
+      function dragModalsOpen() {
+        return (
+          !appFormModal.hidden ||
+          !settingsModal.hidden ||
+          !confirmModal.hidden ||
+          !alertModal.hidden
+        );
+      }
+
+      function clearReorderTimer() {
+        if (dragSession && dragSession.timer) {
+          clearTimeout(dragSession.timer);
+          dragSession.timer = null;
+        }
+      }
+
+      function cancelReorderDrag() {
+        clearReorderTimer();
+        if (!dragSession) return;
+        if (dragSession.ghostEl) dragSession.ghostEl.remove();
+        if (dragSession.card) {
+          dragSession.card.classList.remove("card--drag-armed", "card--drag-source");
+          try {
+            dragSession.card.releasePointerCapture(dragSession.pointerId);
+          } catch (e) {}
+        }
+        gridEl.querySelectorAll(".card--drop-target").forEach(function (c) {
+          c.classList.remove("card--drop-target");
+        });
+        dragSession = null;
+      }
+
+      function positionReorderGhost(clientX, clientY) {
+        const g = document.getElementById("reorderGhost");
+        if (!g) return;
+        g.style.left = clientX + "px";
+        g.style.top = clientY + "px";
+      }
+
+      function updateReorderDropHover(clientX, clientY, fromId, sourceCard) {
+        const ghost = document.getElementById("reorderGhost");
+        if (ghost) ghost.style.visibility = "hidden";
+        const el = document.elementFromPoint(clientX, clientY);
+        if (ghost) ghost.style.visibility = "";
+        gridEl.querySelectorAll(".card--drop-target").forEach(function (c) {
+          c.classList.remove("card--drop-target");
+        });
+        if (!el) return;
+        const card = el.closest && el.closest(".card");
+        if (!card || card === sourceCard) return;
+        if (card.classList.contains("card--add-new")) {
+          card.classList.add("card--drop-target");
+          return;
+        }
+        const bid = card.getAttribute("data-app-id");
+        if (bid && bid !== fromId) card.classList.add("card--drop-target");
+      }
+
+      function pickReorderDropTarget(clientX, clientY, fromId, sourceCard) {
+        const ghost = document.getElementById("reorderGhost");
+        if (ghost) ghost.style.visibility = "hidden";
+        const el = document.elementFromPoint(clientX, clientY);
+        if (ghost) ghost.style.visibility = "";
+        if (!el) return null;
+        const card = el.closest && el.closest(".card");
+        if (!card || card === sourceCard) return null;
+        if (card.classList.contains("card--add-new")) return REORDER_BEFORE_ADD;
+        const bid = card.getAttribute("data-app-id");
+        if (!bid || bid === fromId) return null;
+        return bid;
+      }
+
+      function bindReorderPointer() {
+        gridEl.addEventListener(
+          "pointerdown",
+          function (ev) {
+            if (!started || !state) return;
+            if (dragSession) return;
+            if (dragModalsOpen()) return;
+            if (ev.pointerType === "mouse" && ev.button !== 0) return;
+            const t = ev.target;
+            if (t.closest(".actions")) return;
+            const card = t.closest(".card");
+            if (!card || card.classList.contains("card--add-new")) return;
+            const appId = card.getAttribute("data-app-id");
+            if (!appId) return;
+            const sec = Number(state && state.reorder_long_press_sec);
+            const ms = Math.round((isFinite(sec) ? sec : 3) * 1000);
+            const longPressMs = Math.max(1000, Math.min(8000, ms));
+            dragSession = {
+              pointerId: ev.pointerId,
+              card: card,
+              appId: appId,
+              startX: ev.clientX,
+              startY: ev.clientY,
+              lastX: ev.clientX,
+              lastY: ev.clientY,
+              armed: false,
+              armX: 0,
+              armY: 0,
+              ghostEl: null,
+              timer: null,
+              longPressMs: longPressMs,
+            };
+            dragSession.timer = setTimeout(function () {
+              if (!dragSession || dragSession.armed) return;
+              dragSession.timer = null;
+              dragSession.armed = true;
+              dragSession.armX = dragSession.lastX;
+              dragSession.armY = dragSession.lastY;
+              dragSession.card.classList.add("card--drag-armed", "card--drag-source");
+              const g = document.createElement("div");
+              g.id = "reorderGhost";
+              g.className = "reorder-ghost";
+              var h3 = dragSession.card.querySelector("h3");
+              g.textContent = h3 ? h3.textContent : "App";
+              document.body.appendChild(g);
+              dragSession.ghostEl = g;
+              positionReorderGhost(dragSession.lastX, dragSession.lastY);
+              try {
+                dragSession.card.setPointerCapture(dragSession.pointerId);
+              } catch (err) {}
+            }, longPressMs);
+          },
+          true
+        );
+
+        window.addEventListener("pointermove", function (ev) {
+          if (!dragSession || ev.pointerId !== dragSession.pointerId) return;
+          dragSession.lastX = ev.clientX;
+          dragSession.lastY = ev.clientY;
+          if (!dragSession.armed) {
+            var dx = ev.clientX - dragSession.startX;
+            var dy = ev.clientY - dragSession.startY;
+            if (Math.hypot(dx, dy) > REORDER_MOVE_CANCEL_PX) {
+              clearReorderTimer();
+              dragSession = null;
+            }
+            return;
+          }
+          positionReorderGhost(ev.clientX, ev.clientY);
+          updateReorderDropHover(ev.clientX, ev.clientY, dragSession.appId, dragSession.card);
+        });
+
+        window.addEventListener("pointerup", function (ev) {
+          if (!dragSession || ev.pointerId !== dragSession.pointerId) return;
+          clearReorderTimer();
+          if (!dragSession.armed) {
+            dragSession = null;
+            return;
+          }
+          var moved =
+            Math.hypot(ev.clientX - dragSession.armX, ev.clientY - dragSession.armY) >=
+            REORDER_DRAG_COMMIT_PX;
+          var beforeId = pickReorderDropTarget(
+            ev.clientX,
+            ev.clientY,
+            dragSession.appId,
+            dragSession.card
+          );
+          var appId = dragSession.appId;
+          var srcCard = dragSession.card;
+          try {
+            srcCard.releasePointerCapture(ev.pointerId);
+          } catch (e2) {}
+          if (dragSession.ghostEl) dragSession.ghostEl.remove();
+          srcCard.classList.remove("card--drag-armed", "card--drag-source");
+          gridEl.querySelectorAll(".card--drop-target").forEach(function (c) {
+            c.classList.remove("card--drop-target");
+          });
+          dragSession = null;
+          blockGridClickUntil = Date.now() + 450;
+          if (!moved || !beforeId) return;
+          api("reorder_app", { from_id: appId, before_id: beforeId }).then(function (s) {
+            if (s) render(s);
+          });
+        });
+
+        window.addEventListener("pointercancel", function (ev) {
+          if (!dragSession || ev.pointerId !== dragSession.pointerId) return;
+          cancelReorderDrag();
+        });
+      }
+
       function render(s) {
         if (!s) return;
+        cancelReorderDrag();
         state = s;
         statusEl.textContent = s.status_text || "";
         statusEl.className = "status status--" + (s.status_kind || "ok");
@@ -904,15 +1475,28 @@
           const cls = ["card"];
           if (selected) cls.push("card--selected");
           const title = esc(app.name);
-          const path = esc(app.path);
-          const actions = 
+          const fullPath = String(app.path || "");
+          const subText = cardSubtitleText(app);
+          const subHtml =
+            '<p class="card__path" title="' + escAttr(fullPath) + '">' + esc(subText) + "</p>";
+          const iconBlock = cardIconBlock(app);
+          const launchLabel = app.kind === "url" ? "打开" : "启动";
+          const actions =
             '<div class="actions">' +
-              '<button type="button" class="primary" data-launch="' + esc(app.id) + '">启动</button>' +
+              '<button type="button" class="primary" data-launch="' + esc(app.id) + '">' + launchLabel + '</button>' +
               '<button type="button" class="danger" data-close="' + esc(app.id) + '"' + (running.has(app.id) ? "" : " disabled") + ">关闭</button></div>";
+          const bodyInner =
+            '<div class="card__row">' +
+            iconBlock +
+            '<div class="card__body">' +
+            "<h3>" + title + "</h3>" +
+            meta +
+            subHtml +
+            "</div></div>";
           html +=
-            '<article class="' + cls.join(" ") + '" data-slot="' + i + '"' +
+            '<article class="' + cls.join(" ") + '" data-slot="' + i + '" data-app-id="' + esc(app.id) + '"' +
             (selected ? ' data-rainbow="' + rb + '"' : "") + ">" +
-            "<h3>" + title + "</h3>" + meta + "<p>" + path + "</p>" + actions + "</article>";
+            bodyInner + actions + "</article>";
         }
         html +=
           '<article class="card card--add-new" data-action="add-new">' +
@@ -937,12 +1521,15 @@
         formEditId = null;
         if (mode === "add") {
           formTitle.textContent = "添加应用";
-          formSub.textContent = "填写名称与可执行路径；可选工作目录、图标路径与备注。";
+          formSub.textContent = "选择本地应用或网页链接，填写名称与地址。";
+          formKind = "app";
           fName.value = "";
           fPath.value = "";
           fWd.value = "";
           fIcon.value = "";
           fDesc.value = "";
+          fUrlBrowser.value = "default";
+          syncFormKind();
         } else {
           const app = getSelectedApp();
           if (!app) {
@@ -957,12 +1544,16 @@
           }
           formEditId = app.id;
           formTitle.textContent = "编辑应用";
-          formSub.textContent = "修改名称、路径或可选字段后保存。";
+          formSub.textContent = "可切换类型；修改后保存。";
+          formKind = app.kind === "url" ? "url" : "app";
           fName.value = app.name || "";
           fPath.value = app.path || "";
           fWd.value = app.working_dir || "";
           fIcon.value = app.icon || "";
           fDesc.value = app.description || "";
+          var ub = (app.url_browser || "default").toLowerCase();
+          fUrlBrowser.value = VALID_URL_BROWSERS.indexOf(ub) >= 0 ? ub : "default";
+          syncFormKind();
         }
         appFormModal.hidden = false;
         updateBodyScrollLock();
@@ -985,6 +1576,9 @@
 
       function bindGrid() {
         gridEl.addEventListener("click", async function (ev) {
+          if (Date.now() < blockGridClickUntil && ev.target.closest(".card:not(.card--add-new)")) {
+            return;
+          }
           const t = ev.target;
           if (t.closest(".actions")) {
             const lid = t.getAttribute("data-launch");
@@ -1065,10 +1659,17 @@
         appFormModal.addEventListener("click", function (ev) {
           if (ev.target.closest("[data-form-close]")) closeAppModal();
         });
-        document.getElementById("fBrowse").addEventListener("click", async function () {
+        fBrowse.addEventListener("click", async function () {
           fError.textContent = "";
+          if (formKind === "url") return;
           const p = await api("pick_executable");
           if (p) fPath.value = p;
+        });
+        fKindToggle.addEventListener("click", function (ev) {
+          var btn = ev.target.closest("button[data-kind]");
+          if (!btn) return;
+          formKind = btn.getAttribute("data-kind");
+          syncFormKind();
         });
         document.getElementById("fSave").addEventListener("click", async function () {
           fError.textContent = "";
@@ -1078,6 +1679,8 @@
             working_dir: fWd.value,
             icon: fIcon.value,
             description: fDesc.value,
+            kind: formKind,
+            url_browser: formKind === "url" ? fUrlBrowser.value : "default",
           };
           if (formEditId) payload.id = formEditId;
           const s = await api("save_app_form", payload);
@@ -1095,6 +1698,11 @@
 
       function bindGlobalEscape() {
         document.addEventListener("keydown", function (ev) {
+          if (ev.key === "Escape" && dragSession) {
+            ev.preventDefault();
+            cancelReorderDrag();
+            return;
+          }
           if (ev.key !== "Escape") return;
           if (!settingsModal.hidden) {
             ev.preventDefault();
@@ -1130,7 +1738,10 @@
         });
         document.getElementById("settingsSave").addEventListener("click", async function () {
           settingsErr.textContent = "";
-          const s = await api("save_ui_settings", { skin: pendingSkin });
+          var raw = parseFloat(document.getElementById("reorderLongPressSec").value);
+          var rps = isFinite(raw) ? raw : 3;
+          rps = Math.max(1, Math.min(8, rps));
+          const s = await api("save_ui_settings", { skin: pendingSkin, reorder_long_press_sec: rps });
           if (!s) return;
           if (s.ui_error) {
             settingsErr.textContent = s.ui_error;
@@ -1165,12 +1776,14 @@
                 JSON.stringify(s.launching_ids) +
                 JSON.stringify(s.running_ids) +
                 s.status_text +
-                (s.skin || "");
+                (s.skin || "") +
+                String(s.reorder_long_press_sec || "");
               const b =
                 JSON.stringify(state.launching_ids) +
                 JSON.stringify(state.running_ids) +
                 state.status_text +
-                (state.skin || "");
+                (state.skin || "") +
+                String(state.reorder_long_press_sec || "");
               if (a !== b) render(s);
             }
           });
@@ -1183,6 +1796,7 @@
         if (!started) noBridgeEl.hidden = false;
       }, 1200);
       bindGrid();
+      bindReorderPointer();
       bindFormModal();
       bindSettingsModal();
       bindConfirmAlert();

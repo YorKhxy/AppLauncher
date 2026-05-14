@@ -1,4 +1,5 @@
 {
   "version": "1.0",
-  "skin": "aurora"
+  "skin": "neon",
+  "reorder_long_press_sec": 1.0
 }

@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['G:\\VrLauncher\\src\\main.py'],
+    ['D:\\AppLauncher\\src\\main.py'],
     pathex=[],
     binaries=[],
     datas=[('src/web', 'web'), ('config', 'config')],
