@@ -30,16 +30,28 @@
       "description": "",
       "kind": "app",
       "url_browser": ""
+    }
+  ],
+  "custom_groups": [
+    {
+      "id": "c01cbfd0-0ff5-4faf-a22c-93b9af1aeffc",
+      "name": "测试2",
+      "collapsed": false,
+      "item_ids": [
+        "3c09aef3-596a-43d0-a2f0-ed84e4e8d939",
+        "10d38599-a960-4f8c-9b0a-d4dfa984ed4f",
+        "90467408-f924-4855-a352-54e39cab0e4d"
+      ]
     },
     {
-      "id": "41c35a02-b9c5-4eb6-9eea-cfc7ee3a89df",
-      "name": "建议版本中控",
-      "path": "D:/新建文件夹/jj/start.bat",
-      "working_dir": "",
-      "icon": "",
-      "description": "",
-      "kind": "app",
-      "url_browser": ""
+      "id": "5a1dbaa5-3fcc-4193-97a0-bb73b0861b5c",
+      "name": "测试3",
+      "collapsed": false,
+      "item_ids": [
+        "90467408-f924-4855-a352-54e39cab0e4d",
+        "3c09aef3-596a-43d0-a2f0-ed84e4e8d939",
+        "10d38599-a960-4f8c-9b0a-d4dfa984ed4f"
+      ]
     }
   ]
 }
