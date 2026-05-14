@@ -4,6 +4,8 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 
+# 请在项目根目录执行: python build.py（或运行 build.bat）
+
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -34,7 +36,7 @@ def main():
         "--noconsole",
         "--name=VrLauncher",
         "--add-data=src/web;web",
-        "--add-data=config;config",
+        "--add-data=src/config;config",
         "--workpath=" + build_dir,
         "--distpath=" + release_dir,
         "--noconfirm",

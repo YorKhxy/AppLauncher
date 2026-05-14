@@ -5,7 +5,7 @@ a = Analysis(
     ['D:\\AppLauncher\\src\\main.py'],
     pathex=[],
     binaries=[],
-    datas=[('src/web', 'web'), ('config', 'config')],
+    datas=[('src/web', 'web'), ('src/config', 'config')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

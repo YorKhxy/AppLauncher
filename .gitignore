@@ -1,1 +1,8 @@
 /release/
+/build/
+/dist/
+/VrLauncher/
+**/__pycache__/
+*.py[cod]
+*.pyo
+.trae/
