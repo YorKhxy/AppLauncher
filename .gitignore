@@ -6,3 +6,6 @@
 *.py[cod]
 *.pyo
 .trae/
+.codex/
+AGENTS.md
+README-CODEX.md
