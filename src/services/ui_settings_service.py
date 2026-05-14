@@ -3,7 +3,7 @@ import os
 import sys
 from typing import Any, Dict, Optional
 
-ALLOWED_SKINS = ("neon", "ember", "aurora")
+ALLOWED_SKINS = ("neon", "ember", "aurora", "shadow")
 DEFAULT_SKIN = "neon"
 
 

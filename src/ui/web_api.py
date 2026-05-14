@@ -1,4 +1,3 @@
-import os
 import threading
 import tkinter as tk
 from tkinter import filedialog
@@ -94,7 +93,7 @@ class LauncherApi:
             self.displayed_apps = [
                 app
                 for app in self.apps
-                if q in app.name.lower() or q in os.path.basename(app.path).lower()
+                if q in app.name.lower() or q in (app.path or "").lower()
             ]
         if self.selected_app_id and not any(
             a.id == self.selected_app_id for a in self.displayed_apps
@@ -185,6 +184,16 @@ class LauncherApi:
         app = self.config_service.get_app_by_id(app_id)
         if not app:
             return self.get_state()
+        if app.kind == "url":
+            self._set_status("状态：正在打开浏览器…", "busy")
+            ok = self.launcher_service.launch_app(app)
+            if ok:
+                threading.Timer(0.9, lambda: self._set_status("状态：就绪", "ok")).start()
+            else:
+                self._set_status("状态：打开链接失败", "err")
+                threading.Timer(1.5, lambda: self._set_status("状态：就绪", "ok")).start()
+            return self.get_state()
+
         self._set_status("状态：正在启动…", "busy")
         ok = self.launcher_service.launch_app(app)
         if ok:
@@ -292,6 +301,9 @@ class LauncherApi:
         working_dir = str(data.get("working_dir") or "").strip()
         icon = str(data.get("icon") or "").strip()
         description = str(data.get("description") or "").strip()
+        kind = str(data.get("kind") or "app").strip().lower()
+        if kind not in ("app", "url"):
+            kind = "app"
         app_id = data.get("id")
         if app_id is not None:
             app_id = str(app_id).strip() or None
@@ -299,23 +311,34 @@ class LauncherApi:
             app_id = None
 
         if not name:
-            return err("请输入应用名称")
-        if not path:
-            return err("请选择应用路径")
-        if not LauncherService.validate_path(path):
-            return err("指定的应用路径不存在")
+            return err("请输入名称")
+
+        if kind == "url":
+            path = LauncherService.normalize_url(path)
+            if not path:
+                return err("请输入网页链接")
+            if not LauncherService.validate_url(path):
+                return err("请输入有效的 http(s) 网址（可省略 https://，将自动补全）")
+            working_dir = ""
+        else:
+            if not path:
+                return err("请选择应用路径")
+            if not LauncherService.validate_path(path):
+                return err("指定的应用路径不存在")
 
         if app_id:
             old = self.config_service.get_app_by_id(app_id)
             if not old:
                 return err("应用不存在")
+            wd = "" if kind == "url" else (working_dir if working_dir else (old.working_dir or ""))
             item = AppItem(
                 id=old.id,
                 name=name,
                 path=path,
-                working_dir=working_dir if working_dir else (old.working_dir or ""),
+                working_dir=wd,
                 icon=icon if icon else (old.icon or ""),
                 description=description if description else (old.description or ""),
+                kind=kind,
             )
             if not self.config_service.update_app(old.id, item):
                 return err("保存失败")
@@ -323,9 +346,10 @@ class LauncherApi:
             item = AppItem.create(
                 name=name,
                 path=path,
-                working_dir=working_dir,
+                working_dir="" if kind == "url" else working_dir,
                 icon=icon,
                 description=description,
+                kind=kind,
             )
             if not self.config_service.add_app(item):
                 return err("保存失败")

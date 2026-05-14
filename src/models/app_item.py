@@ -11,16 +11,26 @@ class AppItem:
     working_dir: Optional[str] = ""
     icon: Optional[str] = ""
     description: Optional[str] = ""
+    kind: str = "app"
 
     @classmethod
-    def create(cls, name: str, path: str, working_dir: str = "", icon: str = "", description: str = "") -> 'AppItem':
+    def create(
+        cls,
+        name: str,
+        path: str,
+        working_dir: str = "",
+        icon: str = "",
+        description: str = "",
+        kind: str = "app",
+    ) -> 'AppItem':
         return cls(
             id=str(uuid.uuid4()),
             name=name,
             path=path,
             working_dir=working_dir,
             icon=icon,
-            description=description
+            description=description,
+            kind=kind if kind in ("app", "url") else "app",
         )
 
     def to_dict(self):
@@ -28,11 +38,15 @@ class AppItem:
 
     @classmethod
     def from_dict(cls, data: dict) -> 'AppItem':
+        k = data.get("kind") or "app"
+        if k not in ("app", "url"):
+            k = "app"
         return cls(
             id=data.get('id', str(uuid.uuid4())),
             name=data.get('name', ''),
             path=data.get('path', ''),
             working_dir=data.get('working_dir', ''),
             icon=data.get('icon', ''),
-            description=data.get('description', '')
+            description=data.get('description', ''),
+            kind=k,
         )

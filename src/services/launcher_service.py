@@ -1,8 +1,10 @@
 import os
 import subprocess
 import sys
+import webbrowser
 import psutil
 import time
+from urllib.parse import urlparse
 from typing import Optional, Dict, List, Set
 from models.app_item import AppItem
 
@@ -14,9 +16,20 @@ class LauncherService:
         self.exe_names_to_kill: Dict[str, Set[str]] = {}
     
     def launch_app(self, app_item: AppItem) -> bool:
+        if app_item.kind == "url":
+            url = self.normalize_url(app_item.path)
+            if not self.validate_url(url):
+                return False
+            try:
+                webbrowser.open(url, new=2)
+                return True
+            except Exception as e:
+                print(f"打开链接失败: {e}")
+                return False
+
         if not self.validate_path(app_item.path):
             return False
-        
+
         try:
             working_dir = app_item.working_dir if app_item.working_dir else os.path.dirname(app_item.path)
             
@@ -267,6 +280,23 @@ class LauncherService:
         if not os.path.exists(path):
             return False
         return True
+
+    @staticmethod
+    def normalize_url(raw: str) -> str:
+        s = (raw or "").strip()
+        if not s:
+            return ""
+        p = urlparse(s)
+        if p.scheme in ("http", "https"):
+            return s
+        if "://" not in s:
+            return "https://" + s.lstrip("/")
+        return s
+
+    @staticmethod
+    def validate_url(url: str) -> bool:
+        u = urlparse((url or "").strip())
+        return u.scheme in ("http", "https") and bool(u.netloc)
 
     @staticmethod
     def get_file_type(path: str) -> str:
