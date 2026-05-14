@@ -34,6 +34,77 @@
       --form-primary-border: rgba(34, 211, 238, 0.65);
       --atm-blob-mid: rgba(34, 211, 238, 0.12);
     }
+
+    /* 滚动条与深色霓虹主题统一（WebKit / Blink + Firefox） */
+    .card-grid,
+    #customGroupsRoot,
+    .form-modal,
+    .form-modal__panel,
+    .form-modal__body,
+    .picker-list {
+      scrollbar-width: thin;
+      scrollbar-color: color-mix(in srgb, var(--cyan) 50%, transparent)
+        color-mix(in srgb, var(--void) 92%, var(--surface));
+    }
+    .card-grid::-webkit-scrollbar,
+    #customGroupsRoot::-webkit-scrollbar,
+    .form-modal::-webkit-scrollbar,
+    .form-modal__panel::-webkit-scrollbar,
+    .form-modal__body::-webkit-scrollbar,
+    .picker-list::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    .card-grid::-webkit-scrollbar-track,
+    #customGroupsRoot::-webkit-scrollbar-track,
+    .form-modal::-webkit-scrollbar-track,
+    .form-modal__panel::-webkit-scrollbar-track,
+    .form-modal__body::-webkit-scrollbar-track,
+    .picker-list::-webkit-scrollbar-track {
+      background: color-mix(in srgb, var(--void) 90%, var(--surface));
+      border-radius: 100px;
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cyan) 14%, transparent);
+    }
+    .card-grid::-webkit-scrollbar-thumb,
+    #customGroupsRoot::-webkit-scrollbar-thumb,
+    .form-modal::-webkit-scrollbar-thumb,
+    .form-modal__panel::-webkit-scrollbar-thumb,
+    .form-modal__body::-webkit-scrollbar-thumb,
+    .picker-list::-webkit-scrollbar-thumb {
+      border-radius: 100px;
+      border: 2px solid color-mix(in srgb, var(--void) 94%, transparent);
+      background: linear-gradient(
+        175deg,
+        color-mix(in srgb, var(--cyan) 58%, transparent),
+        color-mix(in srgb, var(--violet) 42%, transparent)
+      );
+    }
+    .card-grid::-webkit-scrollbar-thumb:hover,
+    #customGroupsRoot::-webkit-scrollbar-thumb:hover,
+    .form-modal::-webkit-scrollbar-thumb:hover,
+    .form-modal__panel::-webkit-scrollbar-thumb:hover,
+    .form-modal__body::-webkit-scrollbar-thumb:hover,
+    .picker-list::-webkit-scrollbar-thumb:hover {
+      background: color-mix(in srgb, var(--cyan) 72%, transparent);
+    }
+    .card-grid::-webkit-scrollbar-button,
+    #customGroupsRoot::-webkit-scrollbar-button,
+    .form-modal::-webkit-scrollbar-button,
+    .form-modal__panel::-webkit-scrollbar-button,
+    .form-modal__body::-webkit-scrollbar-button,
+    .picker-list::-webkit-scrollbar-button {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    .card-grid::-webkit-scrollbar-corner,
+    #customGroupsRoot::-webkit-scrollbar-corner,
+    .form-modal::-webkit-scrollbar-corner,
+    .form-modal__panel::-webkit-scrollbar-corner,
+    .form-modal__body::-webkit-scrollbar-corner,
+    .picker-list::-webkit-scrollbar-corner {
+      background: transparent;
+    }
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; }
     body {
@@ -88,12 +159,15 @@
     }
     .head-row {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       justify-content: space-between;
-      gap: 1rem;
-      margin-bottom: 1.1rem;
+      gap: 0.75rem 1rem;
+      margin-bottom: 0.85rem;
+      flex-wrap: nowrap;
     }
     .head-row h1 {
+      flex: 0 1 auto;
+      min-width: 0;
       margin: 0;
       font-family: Orbitron, sans-serif;
       font-weight: 800;
@@ -106,6 +180,7 @@
       color: transparent;
     }
     .head-row .status {
+      flex: 0 0 auto;
       font-family: Orbitron, sans-serif;
       font-size: 0.72rem;
       letter-spacing: 0.22em;
@@ -116,26 +191,50 @@
     .head-row .status.status--busy { color: var(--cyan); }
     .head-row .status.status--warn { color: #fbbf24; }
     .head-row .status.status--err { color: var(--rose); }
+    #searchWrap {
+      flex: 1 1 auto;
+      display: flex;
+      justify-content: center;
+      min-width: 0;
+      max-width: min(320px, 42vw);
+      margin: 0 auto;
+    }
+    #searchWrap[hidden] {
+      display: none !important;
+    }
+    @media (max-width: 520px) {
+      .head-row { flex-wrap: wrap; row-gap: 0.45rem; }
+      .head-row h1 { order: 1; flex: 1 1 auto; min-width: 0; }
+      .head-row .status { order: 2; }
+      #searchWrap { order: 3; flex: 1 1 100%; max-width: none; margin: 0; }
+    }
     .search {
       display: flex;
       align-items: center;
-      gap: 0.65rem;
-      max-width: 520px;
-      margin-left: auto;
-      margin-bottom: 1rem;
-      padding: 0.55rem 1rem;
-      border-radius: 999px;
-      background: rgba(7, 13, 26, 0.9);
-      border: 1px solid var(--search-border);
+      gap: 0.45rem;
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      padding: 0.35rem 0.65rem 0.35rem 0.55rem;
+      border-radius: 10px;
+      background: rgba(7, 13, 26, 0.88);
+      border: 1px solid color-mix(in srgb, var(--search-border) 75%, transparent);
+    }
+    .search .search__icon {
+      flex-shrink: 0;
+      font-size: 0.78rem;
+      opacity: 0.72;
+      line-height: 1;
     }
     .search input {
       flex: 1;
+      min-width: 0;
       background: transparent;
       border: none;
       outline: none;
       color: var(--text);
       font-family: "Exo 2", sans-serif;
-      font-size: 0.95rem;
+      font-size: 0.8rem;
     }
     .search input::placeholder { color: var(--muted); }
     .card-grid {
@@ -1082,37 +1181,15 @@
     }
     .mini-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 0.55rem;
-    }
-    .mini-grid .card {
-      min-height: 118px;
-      padding: 0.55rem 0.55rem 0.5rem;
-    }
-    .mini-grid .card__icon-wrap {
-      width: 42px;
-      height: 42px;
-    }
-    .mini-grid .card__icon-letter {
-      font-size: 0.92rem;
-    }
-    .mini-grid .card__icon-svg {
-      width: 22px;
-      height: 22px;
-    }
-    .mini-grid .card__body h3 {
-      font-size: 0.65rem;
-    }
-    .mini-grid .card button {
-      font-size: 0.62rem;
-      padding: 0.28rem 0.2rem;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.75rem 0.65rem;
     }
     .card--add-to-group {
       border-style: dashed;
       align-items: center;
       justify-content: center;
       text-align: center;
-      min-height: 118px;
+      min-height: 148px;
       cursor: pointer;
     }
     .card--add-to-group h3 {
@@ -1122,17 +1199,6 @@
     }
     .card--add-to-group:hover h3 {
       color: var(--cyan);
-    }
-    .dock .dock-row-label {
-      flex: 0 0 100%;
-      width: 100%;
-      text-align: center;
-      font-family: Orbitron, sans-serif;
-      font-size: 0.58rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.1rem;
     }
     .dock button[disabled] {
       opacity: 0.38;
@@ -1200,6 +1266,12 @@
     <div class="chrome">
       <div class="head-row">
         <h1>VR Launcher</h1>
+        <div id="searchWrap">
+          <div class="search">
+            <span class="search__icon" aria-hidden="true">⌕</span>
+            <input id="searchInput" type="text" placeholder="筛选…" autocomplete="off" />
+          </div>
+        </div>
         <span id="statusLine" class="status status--ok">状态：就绪</span>
       </div>
       <div class="main-tabs" role="tablist" aria-label="主视图">
@@ -1207,10 +1279,6 @@
         <button type="button" class="main-tab" id="tabCustom" role="tab" aria-selected="false">自定义</button>
       </div>
       <div id="viewAll" class="view-panel">
-        <div class="search">
-          <span aria-hidden="true">⌕</span>
-          <input id="searchInput" type="text" placeholder="筛选应用..." autocomplete="off" />
-        </div>
         <div id="cardGrid" class="card-grid"></div>
         <div id="noBridge" class="no-bridge" hidden>
           未检测到 pywebview API（若用浏览器直接打开本文件会出现此提示）。请从 <code>python main.py</code> 启动。
@@ -1236,8 +1304,7 @@
     <button type="button" data-act="up">上移</button>
     <button type="button" data-act="down">下移</button>
   </nav>
-  <nav id="dockCustom" class="dock" aria-label="底栏 · 自定义" hidden style="display: none">
-    <span class="dock-row-label" id="dockCustomLabel">自定义组</span>
+  <nav id="dockCustom" class="dock" aria-label="自定义底栏" hidden style="display: none">
     <button type="button" class="accent" data-act-custom="add-to-group">添加到组</button>
     <button type="button" data-act-custom="remove-from-group" id="dockBtnRemoveFromGroup">移出组</button>
     <button type="button" data-act-custom="edit">编辑</button>
@@ -1403,6 +1470,27 @@
     </div>
   </div>
 
+  <div id="groupNameModal" class="form-modal" hidden>
+    <div class="form-modal__backdrop" data-group-name-close tabindex="-1"></div>
+    <div class="form-modal__panel" role="dialog" aria-modal="true" aria-labelledby="groupNameModalTitle">
+      <div class="form-modal__cap">
+        <h2 id="groupNameModalTitle">组名称</h2>
+        <button type="button" data-group-name-close aria-label="关闭">✕</button>
+      </div>
+      <div class="form-modal__body">
+        <div class="form-field">
+          <label for="groupNameInput">名称</label>
+          <input id="groupNameInput" type="text" autocomplete="off" />
+        </div>
+        <p id="groupNameErr" class="form-err" aria-live="polite"></p>
+        <div class="form-modal__foot">
+          <button type="button" data-group-name-close>取消</button>
+          <button type="button" class="primary" id="groupNameSave">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     (function () {
       const RAINBOW_NAMES = ["赤", "橙", "黄", "绿", "青", "蓝", "靛", "紫"];
@@ -1440,7 +1528,11 @@
       const dockAll = document.getElementById("dockAll");
       const dockCustom = document.getElementById("dockCustom");
       const groupPickerModal = document.getElementById("groupPickerModal");
+      const groupNameModal = document.getElementById("groupNameModal");
+      const groupNameInput = document.getElementById("groupNameInput");
       let pickerTargetGroupId = null;
+      let groupNameModalMode = "create";
+      let groupNameModalGid = null;
       let state = null;
       let searchDebounce = null;
       let started = false;
@@ -1600,7 +1692,8 @@
           !settingsModal.hidden ||
           !confirmModal.hidden ||
           !alertModal.hidden ||
-          !groupPickerModal.hidden
+          !groupPickerModal.hidden ||
+          !groupNameModal.hidden
             ? "hidden"
             : "";
       }
@@ -1695,6 +1788,41 @@
         groupPickerModal.hidden = false;
         updateBodyScrollLock();
       }
+
+      function closeGroupNameModal() {
+        groupNameModal.hidden = true;
+        groupNameModalGid = null;
+        document.getElementById("groupNameErr").textContent = "";
+        updateBodyScrollLock();
+      }
+
+      function openGroupNameModalCreate() {
+        groupNameModalMode = "create";
+        groupNameModalGid = null;
+        document.getElementById("groupNameModalTitle").textContent = "新建自定义组";
+        document.getElementById("groupNameErr").textContent = "";
+        groupNameInput.value = "新分组";
+        groupNameModal.hidden = false;
+        updateBodyScrollLock();
+        setTimeout(function () {
+          groupNameInput.focus();
+          groupNameInput.select();
+        }, 50);
+      }
+
+      function openGroupNameModalRename(gid, curName) {
+        groupNameModalMode = "rename";
+        groupNameModalGid = gid;
+        document.getElementById("groupNameModalTitle").textContent = "编辑组名";
+        document.getElementById("groupNameErr").textContent = "";
+        groupNameInput.value = curName || "";
+        groupNameModal.hidden = false;
+        updateBodyScrollLock();
+        setTimeout(function () {
+          groupNameInput.focus();
+          groupNameInput.select();
+        }, 50);
+      }
       let dragSession = null;
       let customDragSession = null;
       var blockGridClickUntil = 0;
@@ -1705,7 +1833,8 @@
           !settingsModal.hidden ||
           !confirmModal.hidden ||
           !alertModal.hidden ||
-          !groupPickerModal.hidden
+          !groupPickerModal.hidden ||
+          !groupNameModal.hidden
         );
       }
 
@@ -2094,22 +2223,13 @@
         tabCustom.setAttribute("aria-selected", !isAll ? "true" : "false");
         viewAll.hidden = !isAll;
         viewCustom.hidden = isAll;
+        const searchWrap = document.getElementById("searchWrap");
+        if (searchWrap) searchWrap.hidden = !isAll;
         /* pywebview 下 [hidden] 与 .dock{display:flex} 偶发叠层，强制用 display 切换 */
         dockAll.style.display = isAll ? "" : "none";
         dockCustom.style.display = isAll ? "none" : "";
         dockAll.hidden = !isAll;
         dockCustom.hidden = isAll;
-        const gid = state.active_custom_group_id;
-        const groups = state.custom_groups || [];
-        var gname = "未选择";
-        for (var ix = 0; ix < groups.length; ix++) {
-          if (groups[ix].id === gid) {
-            gname = groups[ix].name || gname;
-            break;
-          }
-        }
-        const lab = document.getElementById("dockCustomLabel");
-        if (lab) lab.textContent = "底部栏 · 自定义组 · " + gname;
         const rm = document.getElementById("dockBtnRemoveFromGroup");
         if (rm) rm.disabled = !state.custom_selected_app_id;
         const upb = dockCustom.querySelector('[data-act-custom="up"]');
@@ -2195,7 +2315,7 @@
           html += '<span class="cg-group__chev" aria-hidden="true">▼</span>';
           html += '<span class="cg-group__title">' + esc(g.name || "未命名组") + "</span>";
           html += '<span class="cg-group__meta">' + String(nslots) + " 项</span>";
-          html += '<div class="cg-group__actions" onclick="event.stopPropagation()">';
+          html += '<div class="cg-group__actions">';
           html += '<button type="button" data-group-rename="' + escAttr(g.id) + '">编辑组名</button>';
           html += '<button type="button" data-group-delete="' + escAttr(g.id) + '">删除组</button>';
           html += "</div></div>";
@@ -2493,11 +2613,8 @@
         if (s) render(s);
       });
 
-      document.getElementById("btnNewCustomGroup").addEventListener("click", async function () {
-        const nm = window.prompt("新建自定义组名称", "新分组");
-        if (nm === null) return;
-        const s = await api("add_custom_group", nm.trim() || "新分组");
-        if (s) render(s);
+      document.getElementById("btnNewCustomGroup").addEventListener("click", function () {
+        openGroupNameModalCreate();
       });
       document.getElementById("btnExpandAllGroups").addEventListener("click", async function () {
         const s = await api("custom_groups_set_all_collapsed", false);
@@ -2526,11 +2643,7 @@
             ((state.custom_groups || []).find(function (x) {
               return x.id === gid;
             }) || {}).name || "";
-          const nm = window.prompt("组名称", cur);
-          if (nm !== null && gid) {
-            const s = await api("rename_custom_group", gid, nm.trim() || "未命名组");
-            if (s) render(s);
-          }
+          if (gid) openGroupNameModalRename(gid, cur);
           return;
         }
         const dbtn = t.closest("[data-group-delete]");
@@ -2618,6 +2731,26 @@
         if (s) render(s);
       });
 
+      groupNameModal.addEventListener("click", function (ev) {
+        if (ev.target.closest("[data-group-name-close]")) closeGroupNameModal();
+      });
+      document.getElementById("groupNameSave").addEventListener("click", async function () {
+        document.getElementById("groupNameErr").textContent = "";
+        var v = (groupNameInput.value || "").trim();
+        if (!v) {
+          document.getElementById("groupNameErr").textContent = "请输入组名称。";
+          return;
+        }
+        var s = null;
+        if (groupNameModalMode === "create") {
+          s = await api("add_custom_group", v);
+        } else if (groupNameModalGid) {
+          s = await api("rename_custom_group", groupNameModalGid, v);
+        }
+        closeGroupNameModal();
+        if (s) render(s);
+      });
+
       function bindFormModal() {
         appFormModal.addEventListener("click", function (ev) {
           if (ev.target.closest("[data-form-close]")) closeAppModal();
@@ -2690,6 +2823,11 @@
           if (!alertModal.hidden) {
             ev.preventDefault();
             closeAlertModal();
+            return;
+          }
+          if (!groupNameModal.hidden) {
+            ev.preventDefault();
+            closeGroupNameModal();
             return;
           }
           if (!groupPickerModal.hidden) {

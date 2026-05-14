@@ -39,7 +39,7 @@ def _app_dict_for_ui(app: AppItem) -> Dict[str, Any]:
 
 def _norm_search(q: str) -> str:
     t = (q or "").strip().lower()
-    if t == "筛选应用...":
+    if t in ("筛选应用...", "筛选…"):
         return ""
     return t
 
