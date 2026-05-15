@@ -714,3 +714,55 @@ class LauncherApi:
         g["item_ids"] = ids
         self.config_service.save_apps_and_custom_groups(self.apps, self.custom_groups)
         return self.get_state()
+
+    def custom_groups_reorder(self, payload: Any) -> Dict[str, Any]:
+        """自定义组顺序：拖到另一组组头上则与该项互换位置。"""
+        if not isinstance(payload, dict):
+            payload = {}
+        from_id = str(payload.get("from_id") or "").strip()
+        before_id = str(payload.get("before_id") or "").strip()
+        if not from_id or not before_id or before_id == from_id:
+            return self.get_state()
+
+        from_idx = next(
+            (i for i, g in enumerate(self.custom_groups) if str(g.get("id")) == from_id),
+            None,
+        )
+        to_idx = next(
+            (i for i, g in enumerate(self.custom_groups) if str(g.get("id")) == before_id),
+            None,
+        )
+        if from_idx is None or to_idx is None or from_idx == to_idx:
+            return self.get_state()
+
+        groups = list(self.custom_groups)
+        groups[from_idx], groups[to_idx] = groups[to_idx], groups[from_idx]
+        self.custom_groups = groups
+        self.config_service.save_apps_and_custom_groups(self.apps, self.custom_groups)
+        return self.get_state()
+
+    def custom_groups_reorder(self, payload: Any) -> Dict[str, Any]:
+        """自定义组顺序：拖到另一组组头上则与该项互换位置。"""
+        if not isinstance(payload, dict):
+            payload = {}
+        from_id = str(payload.get("from_id") or "").strip()
+        before_id = str(payload.get("before_id") or "").strip()
+        if not from_id or not before_id or before_id == from_id:
+            return self.get_state()
+
+        from_idx = next(
+            (i for i, g in enumerate(self.custom_groups) if str(g.get("id")) == from_id),
+            None,
+        )
+        to_idx = next(
+            (i for i, g in enumerate(self.custom_groups) if str(g.get("id")) == before_id),
+            None,
+        )
+        if from_idx is None or to_idx is None or from_idx == to_idx:
+            return self.get_state()
+
+        groups = list(self.custom_groups)
+        groups[from_idx], groups[to_idx] = groups[to_idx], groups[from_idx]
+        self.custom_groups = groups
+        self.config_service.save_apps_and_custom_groups(self.apps, self.custom_groups)
+        return self.get_state()

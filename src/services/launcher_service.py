@@ -202,7 +202,7 @@ class LauncherService:
         
         fixed_content = '\n'.join(fixed_lines)
         
-        temp_file = os.path.join(bat_dir, f'_vrlauncher_{bat_name}')
+        temp_file = os.path.join(bat_dir, f"_clickdone_{bat_name}")
         
         with open(temp_file, 'w', encoding='utf-8') as f:
             f.write(fixed_content)
