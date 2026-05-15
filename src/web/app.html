@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>VrLauncher</title>
+  <title>ClickDone</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -1598,7 +1598,7 @@
   <div class="shell">
     <div class="chrome">
       <div class="head-row">
-        <h1>VR Launcher</h1>
+        <h1>ClickDone</h1>
         <div id="searchWrap">
           <div class="search">
             <span class="search__icon" aria-hidden="true">⌕</span>
@@ -1625,7 +1625,7 @@
         </div>
         <div id="cardGrid" class="card-grid" hidden></div>
         <div id="noBridge" class="no-bridge" hidden>
-          未检测到 pywebview API（若用浏览器直接打开本文件会出现此提示）。请从 <code>python main.py</code> 启动。
+          未检测到 pywebview API（若用浏览器直接打开本文件会出现此提示）。请从项目根目录执行 <code>python src/main.py</code> 或运行打包后的 ClickDone 启动。
         </div>
       </div>
       <div id="viewCustom" class="view-panel" hidden>
@@ -1889,8 +1889,8 @@
       let formEditId = null;
       let formKind = "app";
       let pendingSkin = "neon";
-      const SKIN_STORAGE_KEY = "vrlauncher.skin";
-      const MAIN_TAB_STORAGE_KEY = "vrlauncher.main_tab";
+      const SKIN_STORAGE_KEY = "clickdone.skin";
+      const MAIN_TAB_STORAGE_KEY = "clickdone.main_tab";
       let currentMainTab = "all";
 
       const VALID_URL_BROWSERS = ["default", "edge", "chrome", "qq"];

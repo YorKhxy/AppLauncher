@@ -23,7 +23,7 @@ def run_web_ui() -> None:
     api = LauncherApi()
 
     window = webview.create_window(
-        "VrLauncher",
+        "ClickDone",
         url=html_path.as_uri(),
         js_api=api,
         width=1100,

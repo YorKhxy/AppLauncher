@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['G:\\VrLauncher\\src\\main.py'],
+    ['D:\\AppLauncher\\src\\main.py'],
     pathex=[],
     binaries=[],
-    datas=[('src/web', 'web'), ('src/config', 'config')],
+    datas=[('src/web', 'web'), ('src/config', 'config'), ('design/branding/clickdone.ico', 'design/branding')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='VrLauncher',
+    name='ClickDone',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -35,4 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=['D:\\AppLauncher\\design\\branding\\clickdone.ico'],
 )
