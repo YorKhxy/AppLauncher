@@ -153,6 +153,7 @@
       transform-origin: 50% 100%;
       transform: perspective(420px) rotateX(58deg) scale(1.15);
       z-index: 0;
+      pointer-events: none;
       background:
         linear-gradient(to top, var(--void) 0%, transparent 38%),
         repeating-linear-gradient(90deg, var(--grid-line) 0 1px, transparent 1px 48px),
@@ -277,8 +278,8 @@
       align-content: start;
       overflow-x: hidden;
       overflow-y: auto;
+      /* 保留内边距给 hover/描边；勿用负 margin，父级 .view-panel 为 flex 用了 overflow:hidden 会裁切顶部 */
       padding: 8px;
-      margin: -8px;
     }
     .card {
       position: relative;

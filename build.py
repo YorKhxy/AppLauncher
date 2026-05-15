@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 import subprocess
 from datetime import datetime
@@ -54,6 +55,15 @@ def main():
         if os.path.isfile(built_exe):
             os.rename(built_exe, output_exe)
             print(f"Done! Output file: {output_exe}")
+            release_config = os.path.join(release_dir, "config")
+            os.makedirs(release_config, exist_ok=True)
+            defaults_dir = os.path.join(ROOT, "src", "config", "defaults")
+            for fn in ("apps.json", "ui.json"):
+                src_f = os.path.join(defaults_dir, fn)
+                dst_f = os.path.join(release_config, fn)
+                if os.path.isfile(src_f) and not os.path.isfile(dst_f):
+                    shutil.copy2(src_f, dst_f)
+                    print(f"Placed default config: {dst_f}")
         else:
             print(f"Error: VrLauncher.exe not found at {built_exe}")
             sys.exit(1)

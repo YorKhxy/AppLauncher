@@ -1,8 +1,9 @@
 import json
 import os
+import shutil
 import sys
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from models.app_item import AppItem
 
@@ -42,10 +43,23 @@ def _sanitize_group_item_ids(groups: List[Dict[str, Any]], valid_app_ids: set) -
         g["item_ids"] = [i for i in g.get("item_ids", []) if i in valid_app_ids]
 
 
+_APP_ITEM_SHELL: Dict[str, Any] = {
+    "id": "",
+    "name": "",
+    "path": "",
+    "working_dir": "",
+    "icon": "",
+    "description": "",
+    "kind": "app",
+    "url_browser": "",
+}
+
+
 class ConfigService:
     def __init__(self):
         self.config_path = self._get_config_path()
         self._ensure_config_dir()
+        self._seed_apps_from_bundle_if_missing()
 
     def _get_config_path(self) -> str:
         if getattr(sys, "frozen", False):
@@ -60,6 +74,70 @@ class ConfigService:
         if not os.path.exists(config_dir):
             os.makedirs(config_dir)
 
+    def _bundled_defaults_apps_path(self) -> Optional[str]:
+        """PyInstaller 解压目录或源码树内的默认 apps.json（与 build --add-data 对齐）。"""
+        if getattr(sys, "frozen", False):
+            base = getattr(sys, "_MEIPASS", None)
+            if not base:
+                return None
+            return os.path.join(base, "config", "defaults", "apps.json")
+        here = os.path.dirname(os.path.abspath(__file__))
+        src_root = os.path.dirname(here)
+        return os.path.join(src_root, "config", "defaults", "apps.json")
+
+    def _seed_apps_from_bundle_if_missing(self) -> None:
+        """exe 旁尚无 apps.json 时，从包内拷贝一份默认结构（避免同事只有 exe 没有 config）。"""
+        if os.path.isfile(self.config_path):
+            return
+        bp = self._bundled_defaults_apps_path()
+        if bp and os.path.isfile(bp):
+            try:
+                shutil.copy2(bp, self.config_path)
+            except OSError:
+                pass
+
+    @staticmethod
+    def _migrate_apps_document(doc: Dict[str, Any]) -> Tuple[Dict[str, Any], bool]:
+        """补全根级与每条 app 的字段，旧版缺字段时与当前 AppItem 对齐并触发一次回写。"""
+        changed = False
+        if "version" not in doc:
+            doc["version"] = "1.0"
+            changed = True
+
+        raw_apps = doc.get("apps")
+        if not isinstance(raw_apps, list):
+            doc["apps"] = []
+            changed = True
+        else:
+            merged: List[Dict[str, Any]] = []
+            for item in raw_apps:
+                if not isinstance(item, dict):
+                    changed = True
+                    continue
+                if any(k not in item for k in _APP_ITEM_SHELL):
+                    changed = True
+                merged.append({**_APP_ITEM_SHELL, **item})
+            doc["apps"] = merged
+
+        raw_groups = doc.get("custom_groups")
+        if not isinstance(raw_groups, list):
+            doc["custom_groups"] = []
+            changed = True
+
+        return doc, changed
+
+    def _persist_document(self, doc: Dict[str, Any]) -> None:
+        apps: List[AppItem] = []
+        for raw in doc.get("apps", []):
+            if not isinstance(raw, dict):
+                continue
+            try:
+                apps.append(AppItem.from_dict(raw))
+            except Exception:
+                continue
+        groups = _normalize_groups_list(doc.get("custom_groups", []))
+        self._write_document(apps, groups)
+
     def _read_document(self) -> Dict[str, Any]:
         if not os.path.exists(self.config_path):
             return {"version": "1.0", "apps": [], "custom_groups": []}
@@ -68,7 +146,10 @@ class ConfigService:
                 data = json.load(f)
             if not isinstance(data, dict):
                 return {"version": "1.0", "apps": [], "custom_groups": []}
-            return data
+            migrated, changed = self._migrate_apps_document(data)
+            if changed:
+                self._persist_document(migrated)
+            return migrated
         except Exception:
             return {"version": "1.0", "apps": [], "custom_groups": []}
 

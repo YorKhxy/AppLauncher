@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import sys
 from typing import Any, Dict, Optional
 
@@ -15,7 +16,28 @@ class UiSettingsService:
     def __init__(self) -> None:
         self._path = self._get_path()
         self._ensure_dir()
+        self._seed_ui_from_bundle_if_missing()
         self._cache: Optional[Dict[str, Any]] = None
+
+    def _bundled_defaults_ui_path(self) -> Optional[str]:
+        if getattr(sys, "frozen", False):
+            base = getattr(sys, "_MEIPASS", None)
+            if not base:
+                return None
+            return os.path.join(base, "config", "defaults", "ui.json")
+        here = os.path.dirname(os.path.abspath(__file__))
+        src_root = os.path.dirname(here)
+        return os.path.join(src_root, "config", "defaults", "ui.json")
+
+    def _seed_ui_from_bundle_if_missing(self) -> None:
+        if os.path.isfile(self._path):
+            return
+        bp = self._bundled_defaults_ui_path()
+        if bp and os.path.isfile(bp):
+            try:
+                shutil.copy2(bp, self._path)
+            except OSError:
+                pass
 
     def _get_path(self) -> str:
         if getattr(sys, "frozen", False):
