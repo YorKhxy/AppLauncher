@@ -717,6 +717,95 @@
       color: #fecaca;
       font-size: 0.85rem;
     }
+    .bridge-loading {
+      flex: 1;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 0.5rem 1.5rem;
+    }
+    .bridge-loading[hidden] {
+      display: none !important;
+    }
+    .bridge-loading__panel {
+      width: min(360px, 100%);
+      padding: 1.15rem 1.2rem 1.05rem;
+      border-radius: 18px;
+      border: 1px solid color-mix(in srgb, var(--chrome-border) 92%, transparent);
+      background: linear-gradient(165deg, rgba(17, 28, 51, 0.9) 0%, rgba(7, 13, 26, 0.96) 100%);
+      box-shadow:
+        0 18px 54px rgba(0, 0, 0, 0.38),
+        0 0 28px var(--chrome-glow-outer),
+        inset 0 0 0 1px color-mix(in srgb, var(--input-focus-glow) 30%, transparent);
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+    .bridge-loading__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      padding: 0.38rem 0.7rem;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--void) 72%, transparent);
+      border: 1px solid color-mix(in srgb, var(--card-primary-border) 88%, transparent);
+      color: var(--cyan);
+      font-family: Orbitron, sans-serif;
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .bridge-loading__dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 999px;
+      background: currentColor;
+      box-shadow: 0 0 14px currentColor;
+      animation: bridgePulse 1.2s ease-in-out infinite;
+    }
+    .bridge-loading__title {
+      margin: 0;
+      font-family: Orbitron, sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .bridge-loading__desc {
+      margin: 0.55rem 0 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.6;
+    }
+    .bridge-loading__bar {
+      margin-top: 0.95rem;
+      height: 0.34rem;
+      overflow: hidden;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--void) 80%, var(--surface));
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--chrome-border) 55%, transparent);
+    }
+    .bridge-loading__bar::before {
+      content: "";
+      display: block;
+      width: 36%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan) 0%, var(--violet) 100%);
+      box-shadow: 0 0 20px color-mix(in srgb, var(--cyan) 30%, transparent);
+      animation: bridgeSweep 1.15s ease-in-out infinite;
+    }
+    @keyframes bridgePulse {
+      0%, 100% { opacity: 0.45; transform: scale(0.92); }
+      50% { opacity: 1; transform: scale(1.08); }
+    }
+    @keyframes bridgeSweep {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(320%); }
+    }
 
     /* —— 添加 / 编辑应用（Web 内嵌）—— */
     .form-modal {
@@ -1326,7 +1415,18 @@
         <button type="button" class="main-tab" id="tabCustom" role="tab" aria-selected="false">自定义</button>
       </div>
       <div id="viewAll" class="view-panel">
-        <div id="cardGrid" class="card-grid"></div>
+        <div id="bridgeLoading" class="bridge-loading">
+          <div class="bridge-loading__panel" role="status" aria-live="polite">
+            <div class="bridge-loading__badge">
+              <span class="bridge-loading__dot" aria-hidden="true"></span>
+              程序加载中
+            </div>
+            <p class="bridge-loading__title">正在连接本地能力</p>
+            <p class="bridge-loading__desc">启动时需要等待 pywebview API 注入，请稍候。</p>
+            <div class="bridge-loading__bar" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div id="cardGrid" class="card-grid" hidden></div>
         <div id="noBridge" class="no-bridge" hidden>
           未检测到 pywebview API（若用浏览器直接打开本文件会出现此提示）。请从 <code>python main.py</code> 启动。
         </div>
@@ -1547,6 +1647,7 @@
       const gridEl = document.getElementById("cardGrid");
       const statusEl = document.getElementById("statusLine");
       const searchEl = document.getElementById("searchInput");
+      const bridgeLoadingEl = document.getElementById("bridgeLoading");
       const noBridgeEl = document.getElementById("noBridge");
       const appFormModal = document.getElementById("appFormModal");
       const confirmModal = document.getElementById("confirmModal");
@@ -1586,8 +1687,42 @@
       let formEditId = null;
       let formKind = "app";
       let pendingSkin = "neon";
+      const SKIN_STORAGE_KEY = "vrlauncher.skin";
+      const MAIN_TAB_STORAGE_KEY = "vrlauncher.main_tab";
+      let currentMainTab = "all";
 
       const VALID_URL_BROWSERS = ["default", "edge", "chrome", "qq"];
+
+      function readBootSkin() {
+        try {
+          const skin = window.localStorage.getItem(SKIN_STORAGE_KEY);
+          return VALID_SKINS.indexOf(skin) >= 0 ? skin : "neon";
+        } catch (_) {
+          return "neon";
+        }
+      }
+
+      function rememberSkin(skin) {
+        try {
+          window.localStorage.setItem(SKIN_STORAGE_KEY, skin);
+        } catch (_) {}
+      }
+
+      function readBootMainTab() {
+        try {
+          const tab = window.localStorage.getItem(MAIN_TAB_STORAGE_KEY);
+          return tab === "custom" ? "custom" : "all";
+        } catch (_) {
+          return "all";
+        }
+      }
+
+      function rememberMainTab(tab) {
+        currentMainTab = tab === "custom" ? "custom" : "all";
+        try {
+          window.localStorage.setItem(MAIN_TAB_STORAGE_KEY, currentMainTab);
+        } catch (_) {}
+      }
 
       function syncFormKind() {
         fKindToggle.querySelectorAll("button[data-kind]").forEach(function (btn) {
@@ -1731,7 +1866,12 @@
         const k = skin && VALID_SKINS.indexOf(skin) >= 0 ? skin : "neon";
         document.documentElement.classList.remove("skin-neon", "skin-ember", "skin-aurora", "skin-shadow");
         document.documentElement.classList.add("skin-" + k);
+        rememberSkin(k);
       }
+
+      pendingSkin = readBootSkin();
+      applySkin(pendingSkin);
+      rememberMainTab(readBootMainTab());
 
       function updateBodyScrollLock() {
         /* 与 CSS 一致：视口不滚动；主列表在 .card-grid / #customGroupsRoot */
@@ -2255,7 +2395,7 @@
 
       function syncTabDockUi() {
         if (!state) return;
-        var tab = state.main_tab;
+        var tab = currentMainTab || state.main_tab;
         if (tab !== "custom" && tab !== "all") tab = "all";
         var isAll = tab === "all";
         tabAll.classList.toggle("is-active", isAll);
@@ -2264,6 +2404,9 @@
         tabCustom.setAttribute("aria-selected", !isAll ? "true" : "false");
         viewAll.hidden = !isAll;
         viewCustom.hidden = isAll;
+        /* pywebview 下 [hidden] 与 flex 容器偶发叠层，主视图也强制用 display 切换 */
+        viewAll.style.display = isAll ? "flex" : "none";
+        viewCustom.style.display = isAll ? "none" : "flex";
         const searchWrap = document.getElementById("searchWrap");
         if (searchWrap) searchWrap.hidden = !isAll;
         /* pywebview 下 [hidden] 与 .dock{display:flex} 偶发叠层，强制用 display 切换 */
@@ -2277,6 +2420,25 @@
         const dnb = dockCustom.querySelector('[data-act-custom="down"]');
         if (upb) upb.disabled = !state.custom_selected_app_id;
         if (dnb) dnb.disabled = !state.custom_selected_app_id;
+      }
+
+      function switchMainTabLocal(tab) {
+        if (!state) return;
+        var nextTab = tab === "custom" ? "custom" : "all";
+        rememberMainTab(nextTab);
+        state.main_tab = nextTab;
+        if (nextTab === "all") {
+          state.custom_selected_group_id = null;
+          state.custom_selected_app_id = null;
+        } else if (!state.active_custom_group_id) {
+          var groups = state.custom_groups || [];
+          if (groups.length > 0) {
+            state.active_custom_group_id = groups[0].id;
+          }
+        }
+        syncTabDockUi();
+        if (nextTab === "all") renderAllGrid();
+        else renderCustomGrid();
       }
 
       function renderAllGrid() {
@@ -2420,13 +2582,14 @@
         cancelReorderDrag();
         cancelCustomReorderDrag();
         state = s;
+        state.main_tab = currentMainTab || (s.main_tab === "custom" ? "custom" : "all");
         statusEl.textContent = s.status_text || "";
         statusEl.className = "status status--" + (s.status_kind || "ok");
         if (document.activeElement !== searchEl) {
           searchEl.value = s.search || "";
         }
         syncTabDockUi();
-        const tab = s.main_tab || "all";
+        const tab = state.main_tab || "all";
         if (tab === "all") {
           renderAllGrid();
         } else {
@@ -2646,10 +2809,12 @@
       });
 
       tabAll.addEventListener("click", async function () {
+        switchMainTabLocal("all");
         const s = await api("set_main_tab", "all");
         if (s) render(s);
       });
       tabCustom.addEventListener("click", async function () {
+        switchMainTabLocal("custom");
         const s = await api("set_main_tab", "custom");
         if (s) render(s);
       });
@@ -2926,6 +3091,8 @@
         if (started) return;
         if (!window.pywebview || !window.pywebview.api) return;
         started = true;
+        bridgeLoadingEl.hidden = true;
+        gridEl.hidden = false;
         noBridgeEl.hidden = true;
         refreshFromServer();
         setInterval(function () {
@@ -2977,6 +3144,7 @@
       setTimeout(start, 2000);
       setTimeout(function () {
         if (!started && (!window.pywebview || !window.pywebview.api)) {
+          bridgeLoadingEl.hidden = true;
           noBridgeEl.hidden = false;
         }
       }, 8000);

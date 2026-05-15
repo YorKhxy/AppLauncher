@@ -52,6 +52,18 @@
         "3c09aef3-596a-43d0-a2f0-ed84e4e8d939",
         "10d38599-a960-4f8c-9b0a-d4dfa984ed4f"
       ]
+    },
+    {
+      "id": "10b5a0b3-f9be-4d0c-a461-65005cb58f6b",
+      "name": "测试组",
+      "collapsed": false,
+      "item_ids": []
+    },
+    {
+      "id": "6b45c28e-1232-45eb-8f2a-3a86297f09b9",
+      "name": "测试组",
+      "collapsed": false,
+      "item_ids": []
     }
   ]
 }
