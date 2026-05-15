@@ -1512,6 +1512,18 @@
     .cg-group.is-collapsed .cg-group__body {
       display: none;
     }
+    .cg-group--drag-armed .cg-group__head {
+      animation: reorder-border-shake 0.45s ease-in-out 1;
+    }
+    .cg-group--drag-source {
+      opacity: 0.5;
+    }
+    .cg-group--drop-target:not(.cg-group--drag-source) {
+      box-shadow:
+        0 0 0 2px rgba(34, 211, 238, 0.45),
+        0 0 28px rgba(34, 211, 238, 0.35);
+      border-color: var(--cyan);
+    }
     .mini-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -2214,6 +2226,7 @@
       }
       let dragSession = null;
       let customDragSession = null;
+      let customGroupDragSession = null;
       var blockGridClickUntil = 0;
 
       function dragModalsOpen() {
@@ -2298,6 +2311,7 @@
             if ((state.main_tab || "all") !== "all") return;
             if (dragSession) return;
             if (customDragSession) return;
+            if (customGroupDragSession) return;
             if (dragModalsOpen()) return;
             if (ev.pointerType === "mouse" && ev.button !== 0) return;
             const t = ev.target;
@@ -2426,6 +2440,196 @@
         customDragSession = null;
       }
 
+      function cancelCustomGroupReorderDrag() {
+        if (!customGroupDragSession) return;
+        if (customGroupDragSession.timer) {
+          clearTimeout(customGroupDragSession.timer);
+          customGroupDragSession.timer = null;
+        }
+        if (customGroupDragSession.ghostEl) customGroupDragSession.ghostEl.remove();
+        if (customGroupDragSession.groupEl) {
+          customGroupDragSession.groupEl.classList.remove(
+            "cg-group--drag-armed",
+            "cg-group--drag-source"
+          );
+          try {
+            customGroupDragSession.groupEl.releasePointerCapture(
+              customGroupDragSession.pointerId
+            );
+          } catch (e5) {}
+        }
+        if (customGroupsRoot) {
+          customGroupsRoot.querySelectorAll(".cg-group--drop-target").forEach(function (g) {
+            g.classList.remove("cg-group--drop-target");
+          });
+        }
+        customGroupDragSession = null;
+      }
+
+      function updateCustomGroupReorderDropHover(clientX, clientY, fromId, sourceGroup) {
+        const ghost = document.getElementById("reorderGhost");
+        if (ghost) ghost.style.visibility = "hidden";
+        const el = document.elementFromPoint(clientX, clientY);
+        if (ghost) ghost.style.visibility = "";
+        if (customGroupsRoot) {
+          customGroupsRoot.querySelectorAll(".cg-group--drop-target").forEach(function (g) {
+            g.classList.remove("cg-group--drop-target");
+          });
+        }
+        if (!el) return;
+        const grp = el.closest && el.closest(".cg-group");
+        if (!grp || grp === sourceGroup) return;
+        const bid = grp.getAttribute("data-group-id");
+        if (bid && bid !== fromId) grp.classList.add("cg-group--drop-target");
+      }
+
+      function pickCustomGroupReorderDropTarget(clientX, clientY, fromId, sourceGroup) {
+        const ghost = document.getElementById("reorderGhost");
+        if (ghost) ghost.style.visibility = "hidden";
+        const el = document.elementFromPoint(clientX, clientY);
+        if (ghost) ghost.style.visibility = "";
+        if (!el) return null;
+        const grp = el.closest && el.closest(".cg-group");
+        if (!grp || grp === sourceGroup) return null;
+        const bid = grp.getAttribute("data-group-id");
+        if (!bid || bid === fromId) return null;
+        return bid;
+      }
+
+      function bindCustomGroupReorderPointer() {
+        if (!customGroupsRoot) return;
+        customGroupsRoot.addEventListener(
+          "pointerdown",
+          function (ev) {
+            if (!started || !state) return;
+            if ((state.main_tab || "all") !== "custom") return;
+            if (customGroupDragSession || customDragSession || dragSession) return;
+            if (dragModalsOpen()) return;
+            if (ev.pointerType === "mouse" && ev.button !== 0) return;
+            const t = ev.target;
+            if (t.closest(".cg-group__actions")) return;
+            const head = t.closest(".cg-group__head");
+            if (!head) return;
+            const groupEl = head.closest(".cg-group");
+            const groupId = groupEl && groupEl.getAttribute("data-group-id");
+            if (!groupEl || !groupId) return;
+            const sec = Number(state && state.reorder_long_press_sec);
+            const ms = Math.round((isFinite(sec) && sec > 0 ? sec : 3) * 1000);
+            const longPressMs = Math.max(1, Math.min(8000, ms));
+            customGroupDragSession = {
+              pointerId: ev.pointerId,
+              groupEl: groupEl,
+              headEl: head,
+              groupId: groupId,
+              startX: ev.clientX,
+              startY: ev.clientY,
+              lastX: ev.clientX,
+              lastY: ev.clientY,
+              armed: false,
+              armX: 0,
+              armY: 0,
+              ghostEl: null,
+              timer: null,
+              longPressMs: longPressMs,
+            };
+            customGroupDragSession.timer = setTimeout(function () {
+              if (!customGroupDragSession || customGroupDragSession.armed) return;
+              customGroupDragSession.timer = null;
+              customGroupDragSession.armed = true;
+              customGroupDragSession.armX = customGroupDragSession.lastX;
+              customGroupDragSession.armY = customGroupDragSession.lastY;
+              customGroupDragSession.groupEl.classList.add(
+                "cg-group--drag-armed",
+                "cg-group--drag-source"
+              );
+              const g = document.createElement("div");
+              g.id = "reorderGhost";
+              g.className = "reorder-ghost";
+              var titleEl = customGroupDragSession.groupEl.querySelector(".cg-group__title");
+              g.textContent = titleEl ? titleEl.textContent : "分组";
+              document.body.appendChild(g);
+              customGroupDragSession.ghostEl = g;
+              positionReorderGhost(customGroupDragSession.lastX, customGroupDragSession.lastY);
+              try {
+                customGroupDragSession.groupEl.setPointerCapture(
+                  customGroupDragSession.pointerId
+                );
+              } catch (err3) {}
+            }, longPressMs);
+          },
+          true
+        );
+
+        window.addEventListener("pointermove", function (ev) {
+          if (!customGroupDragSession || ev.pointerId !== customGroupDragSession.pointerId) return;
+          customGroupDragSession.lastX = ev.clientX;
+          customGroupDragSession.lastY = ev.clientY;
+          if (!customGroupDragSession.armed) {
+            var dxg = ev.clientX - customGroupDragSession.startX;
+            var dyg = ev.clientY - customGroupDragSession.startY;
+            if (Math.hypot(dxg, dyg) > REORDER_MOVE_CANCEL_PX) {
+              if (customGroupDragSession.timer) clearTimeout(customGroupDragSession.timer);
+              customGroupDragSession.timer = null;
+              customGroupDragSession = null;
+            }
+            return;
+          }
+          positionReorderGhost(ev.clientX, ev.clientY);
+          updateCustomGroupReorderDropHover(
+            ev.clientX,
+            ev.clientY,
+            customGroupDragSession.groupId,
+            customGroupDragSession.groupEl
+          );
+        });
+
+        window.addEventListener("pointerup", function (ev) {
+          if (!customGroupDragSession || ev.pointerId !== customGroupDragSession.pointerId) return;
+          if (customGroupDragSession.timer) {
+            clearTimeout(customGroupDragSession.timer);
+            customGroupDragSession.timer = null;
+          }
+          if (!customGroupDragSession.armed) {
+            customGroupDragSession = null;
+            return;
+          }
+          var movedG =
+            Math.hypot(
+              ev.clientX - customGroupDragSession.armX,
+              ev.clientY - customGroupDragSession.armY
+            ) >= REORDER_DRAG_COMMIT_PX;
+          var beforeGid = pickCustomGroupReorderDropTarget(
+            ev.clientX,
+            ev.clientY,
+            customGroupDragSession.groupId,
+            customGroupDragSession.groupEl
+          );
+          var fromGid = customGroupDragSession.groupId;
+          var srcG = customGroupDragSession.groupEl;
+          try {
+            srcG.releasePointerCapture(ev.pointerId);
+          } catch (e6) {}
+          if (customGroupDragSession.ghostEl) customGroupDragSession.ghostEl.remove();
+          srcG.classList.remove("cg-group--drag-armed", "cg-group--drag-source");
+          if (customGroupsRoot) {
+            customGroupsRoot.querySelectorAll(".cg-group--drop-target").forEach(function (g) {
+              g.classList.remove("cg-group--drop-target");
+            });
+          }
+          customGroupDragSession = null;
+          blockGridClickUntil = Date.now() + 450;
+          if (!movedG || !beforeGid) return;
+          api("custom_groups_reorder", { from_id: fromGid, before_id: beforeGid }).then(function (s3) {
+            if (s3) render(s3);
+          });
+        });
+
+        window.addEventListener("pointercancel", function (ev) {
+          if (!customGroupDragSession || ev.pointerId !== customGroupDragSession.pointerId) return;
+          cancelCustomGroupReorderDrag();
+        });
+      }
+
       function updateCustomReorderDropHover(clientX, clientY, fromId, sourceCard, groupId) {
         const ghost = document.getElementById("reorderGhost");
         if (ghost) ghost.style.visibility = "hidden";
@@ -2473,6 +2677,7 @@
             if (!started || !state) return;
             if ((state.main_tab || "all") !== "custom") return;
             if (customDragSession || dragSession) return;
+            if (customGroupDragSession) return;
             if (dragModalsOpen()) return;
             if (ev.pointerType === "mouse" && ev.button !== 0) return;
             const t = ev.target;
@@ -2789,6 +2994,7 @@
         if (!s) return;
         cancelReorderDrag();
         cancelCustomReorderDrag();
+        cancelCustomGroupReorderDrag();
         state = s;
         state.main_tab = currentMainTab || (s.main_tab === "custom" ? "custom" : "all");
         statusEl.textContent = s.status_text || "";
@@ -3043,6 +3249,7 @@
         const t = ev.target;
         const head = t.closest("[data-group-toggle]");
         if (head && !t.closest(".cg-group__actions")) {
+          if (Date.now() < blockGridClickUntil) return;
           const gid = head.getAttribute("data-group-toggle");
           if (gid) {
             const s = await api("toggle_custom_group_collapsed", gid);
@@ -3359,6 +3566,7 @@
       bindGrid();
       bindReorderPointer();
       bindCustomReorderPointer();
+      bindCustomGroupReorderPointer();
       bindFormModal();
       bindSettingsModal();
       bindConfirmAlert();
