@@ -2969,10 +2969,17 @@
       }
 
       window.addEventListener("pywebviewready", start);
+      /* 部分环境 pywebviewready 较晚于首帧；勿在短超时内显示 noBridge，否则会误闪「未检测到 API」 */
+      start();
+      setTimeout(start, 50);
+      setTimeout(start, 200);
+      setTimeout(start, 800);
+      setTimeout(start, 2000);
       setTimeout(function () {
-        start();
-        if (!started) noBridgeEl.hidden = false;
-      }, 1200);
+        if (!started && (!window.pywebview || !window.pywebview.api)) {
+          noBridgeEl.hidden = false;
+        }
+      }, 8000);
       bindGrid();
       bindReorderPointer();
       bindCustomReorderPointer();
