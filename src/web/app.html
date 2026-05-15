@@ -1006,6 +1006,200 @@
         radial-gradient(ellipse 50% 42% at 50% 50%, rgba(82, 82, 91, 0.06), transparent 72%);
     }
 
+    /* —— 日光：明亮底 + 高饱和点缀（青 / 紫 / 玫 / 琥珀）—— */
+    html.skin-daylight {
+      --void: #e8f0fe;
+      --surface: #ffffff;
+      --elev: #f1f5ff;
+      --cyan: #0ea5e9;
+      --cyan-dim: #0284c7;
+      --magenta: #db2777;
+      --violet: #7c3aed;
+      --rose: #ea580c;
+      --text: #0f172a;
+      --muted: #64748b;
+      --grid-line: rgba(124, 58, 237, 0.14);
+      --chrome-border: rgba(14, 165, 233, 0.3);
+      --chrome-glow-outer: rgba(14, 165, 233, 0.22);
+      --search-border: rgba(124, 58, 237, 0.38);
+      --card-primary-border: rgba(14, 165, 233, 0.52);
+      --dock-accent-border: rgba(124, 58, 237, 0.48);
+      --modal-shell-border: rgba(124, 58, 237, 0.3);
+      --modal-shell-glow: rgba(14, 165, 233, 0.14);
+      --modal-cap-line: rgba(148, 163, 184, 0.45);
+      --input-focus-border: #0ea5e9;
+      --input-focus-glow: rgba(14, 165, 233, 0.3);
+      --browse-hover-bg: rgba(14, 165, 233, 0.12);
+      --form-primary-border: #0ea5e9;
+      --atm-blob-mid: rgba(236, 72, 153, 0.2);
+    }
+    html.skin-daylight .atmosphere {
+      background:
+        radial-gradient(ellipse 100% 80% at 8% 0%, rgba(236, 72, 153, 0.32), transparent 55%),
+        radial-gradient(ellipse 95% 70% at 92% 100%, rgba(14, 165, 233, 0.26), transparent 52%),
+        radial-gradient(ellipse 55% 48% at 48% 42%, rgba(251, 191, 36, 0.18), transparent 62%);
+    }
+    html.skin-daylight .grid-floor {
+      background:
+        linear-gradient(to top, var(--void) 0%, transparent 42%),
+        repeating-linear-gradient(90deg, var(--grid-line) 0 1px, transparent 1px 52px),
+        repeating-linear-gradient(0deg, var(--grid-line) 0 1px, transparent 1px 52px);
+    }
+    html.skin-daylight .chrome {
+      background: linear-gradient(165deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 250, 252, 0.99) 100%);
+      box-shadow:
+        0 0 0 1px rgba(148, 163, 184, 0.28),
+        0 24px 70px rgba(15, 23, 42, 0.1),
+        0 0 100px var(--chrome-glow-outer);
+    }
+    html.skin-daylight .search {
+      background: rgba(255, 255, 255, 0.96);
+      border-color: color-mix(in srgb, var(--search-border) 60%, transparent);
+    }
+    html.skin-daylight .main-tabs {
+      background: rgba(255, 255, 255, 0.78);
+      border-color: rgba(148, 163, 184, 0.5);
+    }
+    html.skin-daylight .main-tab.is-active {
+      color: var(--cyan-dim);
+      background: color-mix(in srgb, var(--cyan) 14%, #ffffff);
+      box-shadow: inset 0 0 0 1px var(--card-primary-border);
+    }
+    html.skin-daylight .card {
+      background: linear-gradient(180deg, #ffffff 0%, var(--elev) 100%);
+      border-color: rgba(148, 163, 184, 0.55);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+    html.skin-daylight .card:hover:not(.card--selected) {
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
+    }
+    html.skin-daylight .card__icon {
+      border-color: rgba(148, 163, 184, 0.65);
+      background: linear-gradient(145deg, #fef3c7, #e0e7ff);
+    }
+    html.skin-daylight .card__folder-btn {
+      border-color: rgba(148, 163, 184, 0.75);
+      background: rgba(255, 255, 255, 0.96);
+    }
+    html.skin-daylight .card__folder-btn:hover {
+      background: #ffffff;
+    }
+    html.skin-daylight .card button {
+      border-color: rgba(148, 163, 184, 0.55);
+      background: rgba(248, 250, 252, 0.96);
+      color: var(--text);
+    }
+    html.skin-daylight .dock {
+      background: rgba(255, 255, 255, 0.94);
+      border-color: color-mix(in srgb, var(--violet) 42%, white);
+      box-shadow: 0 16px 48px rgba(15, 23, 42, 0.12);
+    }
+    html.skin-daylight .dock button {
+      background: #ffffff;
+      border-color: rgba(148, 163, 184, 0.55);
+      color: var(--text);
+    }
+    html.skin-daylight .dock button:hover:not(:disabled) {
+      background: var(--elev);
+      color: var(--cyan-dim);
+      box-shadow: 0 0 0 1px var(--input-focus-glow), 0 8px 24px rgba(15, 23, 42, 0.1);
+    }
+    html.skin-daylight .dock button.accent {
+      background: linear-gradient(120deg, var(--cyan), var(--violet));
+      border-color: transparent;
+      color: #ffffff;
+    }
+    html.skin-daylight .dock button.accent:hover:not(:disabled) {
+      color: #ffffff;
+      background: linear-gradient(120deg, var(--cyan-dim), #6d28d9);
+      filter: brightness(1.05);
+    }
+    html.skin-daylight .dock button.accent:active:not(:disabled) {
+      background: linear-gradient(120deg, #0369a1, #5b21b6);
+    }
+    html.skin-daylight .form-modal__backdrop {
+      background: rgba(15, 23, 42, 0.38);
+    }
+    html.skin-daylight .form-modal__panel {
+      background: linear-gradient(165deg, #ffffff 0%, #f8fafc 100%);
+      box-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), 0 0 48px var(--modal-shell-glow);
+    }
+    html.skin-daylight .form-modal__cap {
+      background: rgba(241, 245, 249, 0.98);
+    }
+    html.skin-daylight .form-modal__cap button:hover {
+      background: rgba(15, 23, 42, 0.06);
+    }
+    html.skin-daylight .form-field input,
+    html.skin-daylight .form-field textarea,
+    html.skin-daylight .form-field select {
+      border-color: rgba(148, 163, 184, 0.75);
+      background: #ffffff;
+      color: var(--text);
+    }
+    html.skin-daylight .path-row button {
+      background: #ffffff;
+      border-color: var(--card-primary-border);
+      color: var(--cyan-dim);
+    }
+    html.skin-daylight .kind-toggle {
+      border-color: rgba(148, 163, 184, 0.65);
+    }
+    html.skin-daylight .kind-toggle button {
+      background: #f8fafc;
+      color: var(--muted);
+    }
+    html.skin-daylight .kind-toggle button.is-active {
+      background: color-mix(in srgb, var(--cyan) 16%, #ffffff);
+      color: var(--cyan-dim);
+    }
+    html.skin-daylight .form-modal__foot button {
+      background: #f1f5f9;
+      border-color: rgba(148, 163, 184, 0.55);
+      color: var(--text);
+    }
+    html.skin-daylight .form-modal__foot button.primary {
+      background: linear-gradient(120deg, var(--cyan), var(--violet));
+      border-color: transparent;
+      color: #ffffff;
+    }
+    html.skin-daylight .custom-toolbar button {
+      background: #ffffff;
+      border-color: rgba(148, 163, 184, 0.55);
+      color: var(--muted);
+    }
+    html.skin-daylight .cg-group {
+      border-color: rgba(148, 163, 184, 0.5);
+      background: rgba(255, 255, 255, 0.86);
+    }
+    html.skin-daylight .cg-group__head {
+      background: rgba(248, 250, 252, 0.98);
+      border-bottom-color: rgba(148, 163, 184, 0.35);
+    }
+    html.skin-daylight .cg-group__head:hover {
+      background: rgba(241, 245, 249, 0.98);
+    }
+    html.skin-daylight .cg-group__actions button {
+      background: #ffffff;
+      border-color: rgba(148, 163, 184, 0.55);
+    }
+    html.skin-daylight .cg-group.is-active-group {
+      box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.38);
+    }
+    html.skin-daylight .picker-row {
+      background: rgba(255, 255, 255, 0.94);
+      border-color: rgba(148, 163, 184, 0.45);
+    }
+    html.skin-daylight .skin-card {
+      border-color: rgba(148, 163, 184, 0.45);
+      background: rgba(255, 255, 255, 0.92);
+    }
+    html.skin-daylight .no-bridge {
+      background: rgba(254, 226, 226, 0.96);
+      border-color: rgba(251, 113, 133, 0.55);
+      color: #991b1b;
+    }
+
     #settingsModal .form-modal__panel {
       width: min(520px, 100%);
     }
@@ -1067,6 +1261,9 @@
     }
     .skin-card[data-skin="shadow"] .skin-card__sw {
       background: linear-gradient(120deg, #52525b, #a1a1aa, #e4e4e7);
+    }
+    .skin-card[data-skin="daylight"] .skin-card__sw {
+      background: linear-gradient(118deg, #f472b6, #fbbf24, #34d399, #38bdf8, #a78bfa);
     }
 
     .form-err {
@@ -1448,6 +1645,11 @@
             <div class="skin-card__name">暗影</div>
             <div class="skin-card__desc">冷灰金属</div>
           </button>
+          <button type="button" class="skin-card" data-skin="daylight">
+            <div class="skin-card__sw" aria-hidden="true"></div>
+            <div class="skin-card__name">日光</div>
+            <div class="skin-card__desc">明亮 · 彩色</div>
+          </button>
         </div>
         <div class="form-field" style="margin-top: 0.75rem">
           <label for="reorderLongPressSec">长按排序触发时间（秒）</label>
@@ -1725,11 +1927,17 @@
         );
       }
 
-      const VALID_SKINS = ["neon", "ember", "aurora", "shadow"];
+      const VALID_SKINS = ["neon", "ember", "aurora", "shadow", "daylight"];
 
       function applySkin(skin) {
         const k = skin && VALID_SKINS.indexOf(skin) >= 0 ? skin : "neon";
-        document.documentElement.classList.remove("skin-neon", "skin-ember", "skin-aurora", "skin-shadow");
+        document.documentElement.classList.remove(
+          "skin-neon",
+          "skin-ember",
+          "skin-aurora",
+          "skin-shadow",
+          "skin-daylight"
+        );
         document.documentElement.classList.add("skin-" + k);
       }
 

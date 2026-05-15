@@ -4,7 +4,7 @@ import shutil
 import sys
 from typing import Any, Dict, Optional
 
-ALLOWED_SKINS = ("neon", "ember", "aurora", "shadow")
+ALLOWED_SKINS = ("neon", "ember", "aurora", "shadow", "daylight")
 DEFAULT_SKIN = "neon"
 DEFAULT_REORDER_LONG_PRESS_SEC = 3.0
 MAX_REORDER_LONG_PRESS_SEC = 8.0
