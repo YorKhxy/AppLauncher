@@ -3176,8 +3176,25 @@
           return;
         }
         let s = null;
-        if (act === "del") s = await api("delete_app");
-        else if (act === "refresh") s = await api("refresh");
+        if (act === "del") {
+          const app = getSelectedApp();
+          if (!app) {
+            statusEl.textContent = "请先单击选中一个应用卡片，再点「删除」";
+            statusEl.className = "status status--warn";
+            setTimeout(function () {
+              if (!state) return;
+              statusEl.textContent = state.status_text || "";
+              statusEl.className = "status status--" + (state.status_kind || "ok");
+            }, 2400);
+            return;
+          }
+          const ok = await showConfirm(
+            "确认删除",
+            "确定要删除「" + (app.name || "未命名") + "」吗？此操作不可恢复。"
+          );
+          if (!ok) return;
+          s = await api("delete_app");
+        } else if (act === "refresh") s = await api("refresh");
         else if (act === "up") s = await api("move_up");
         else if (act === "down") s = await api("move_down");
         if (s) render(s);
