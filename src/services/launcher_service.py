@@ -62,12 +62,20 @@ class LauncherService:
             if file_type == 'bat':
                 exe_names = self._extract_exe_names_simple(app_item.path)
                 self.exe_names_to_kill[app_item.id] = exe_names
-                
-                temp_bat_path = self._create_fixed_bat(app_item.path)
-                self.temp_bat_files[app_item.id] = [temp_bat_path]
-                
+
+                if self._bat_is_self_managed(app_item.path):
+                    # 脚本自带 start 启动或自行提权(%~f0 / -Verb RunAs)：直接运行原始 .bat。
+                    # 改写成临时副本会重命名脚本（破坏 %~f0/%~nx0 自引用与提权重启），
+                    # 还会删掉 taskkill 行——而「先 taskkill 旧实例、再启动另一模式」正是
+                    # 这类共享同一 exe 的脚本能切换的前提，改写后切换会失效。
+                    run_target = app_item.path
+                else:
+                    temp_bat_path = self._create_fixed_bat(app_item.path)
+                    self.temp_bat_files[app_item.id] = [temp_bat_path]
+                    run_target = temp_bat_path
+
                 process = subprocess.Popen(
-                    temp_bat_path,
+                    run_target,
                     cwd=working_dir,
                     shell=True,
                     creationflags=subprocess.CREATE_NEW_CONSOLE
@@ -98,6 +106,29 @@ class LauncherService:
             print(f"启动应用失败: {e}")
             return False
     
+    def _bat_is_self_managed(self, bat_path: str) -> bool:
+        """脚本是否已自行管理启动：用 start 启动 exe，或自带管理员提权(%~f0 / -Verb RunAs)。
+        这类脚本按原样运行，避免改写临时副本破坏自引用、提权与 taskkill 逻辑。"""
+        content = ""
+        for enc in ("utf-8", "gbk", "latin-1"):
+            try:
+                with open(bat_path, "r", encoding=enc) as f:
+                    content = f.read()
+                break
+            except UnicodeDecodeError:
+                continue
+            except OSError:
+                return False
+
+        low = content.lower()
+        if "-verb runas" in low or "%~f0" in low:
+            return True
+        for line in content.split("\n"):
+            s = line.strip().lower()
+            if s.startswith("start ") and ".exe" in s:
+                return True
+        return False
+
     def _extract_exe_names_simple(self, bat_path: str) -> Set[str]:
         exe_names = set()
         
